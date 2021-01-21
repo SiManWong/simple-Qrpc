@@ -1,0 +1,40 @@
+package com.siman.qrpc.factory;
+
+import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * 获取单例对象的工厂类
+ * @author SiMan
+ * @date 2020/12/28 2:08
+ */
+
+public final class SingletonFactory {
+    private static volatile Map<String, Object> objectMap = new HashMap<>();
+
+    private SingletonFactory() {
+    }
+
+    public static <T> T getInstance(Class<T> c) {
+        String key = c.toString();
+        Object instance = objectMap.get(key);
+        if (instance == null) {
+            synchronized (SingletonFactory.class) {
+                instance = objectMap.get(key);
+                if (instance == null) {
+                    try {
+                        instance = c.getDeclaredConstructor().newInstance();
+                        objectMap.put(key, instance);
+                    } catch (IllegalAccessException | InstantiationException e) {
+                        throw new RuntimeException(e.getMessage(), e);
+                    } catch (NoSuchMethodException | InvocationTargetException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+
+        return c.cast(instance);
+    }
+}
