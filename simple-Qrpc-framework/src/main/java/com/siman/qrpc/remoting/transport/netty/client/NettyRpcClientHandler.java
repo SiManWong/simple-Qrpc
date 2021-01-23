@@ -18,22 +18,22 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class NettyRpcClientHandler extends ChannelInboundHandlerAdapter {
 //    private final UnprocessedRequests unprocessedRequests;
-    private final NettyRpcClient nettyRpcClient;
-
-    public NettyRpcClientHandler() {
-        this.nettyRpcClient = SingletonFactory.getInstance(NettyRpcClient.class);
-    }
+//    private final NettyRpcClient nettyRpcClient;
+//
+//    public NettyRpcClientHandler() {
+//        this.nettyRpcClient = SingletonFactory.getInstance(NettyRpcClient.class);
+//    }
 
     /**
      * 读取服务端传输的消息
      */
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+    public void channelRead(ChannelHandlerContext ctx, Object msg) {
         try {
             RpcResponse rpcResponse = (RpcResponse) msg;
             log.info("client receive msg: [{}]", rpcResponse.toString());
             // 声明一个 AttributeKey 对象
-            AttributeKey<RpcResponse> key = AttributeKey.valueOf("rpcResponse");
+            AttributeKey<RpcResponse> key = AttributeKey.valueOf("rpcResponse" + rpcResponse.getRequestId());
             // 将服务端的返回结果保存到 AttributeMap 上，AttributeMap 可以看作是一个Channel的共享数据源
             // AttributeMap的key是AttributeKey，value是Attribute
             ctx.channel().attr(key).set(rpcResponse);

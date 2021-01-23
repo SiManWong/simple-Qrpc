@@ -48,6 +48,7 @@ public class RpcClientProxy implements InvocationHandler {
     /**
      * 通过 Proxy.newProxyInstance() 方法获取某个类的代理对象
      */
+    @SuppressWarnings("unchecked")
     public <T> T getProxy(Class<T> clazz) {
         return (T)Proxy.newProxyInstance(clazz.getClassLoader(), new Class<?>[]{clazz}, this);
     }
@@ -57,7 +58,7 @@ public class RpcClientProxy implements InvocationHandler {
      */
     @Override
     @SuppressWarnings("unchecked")
-    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+    public Object invoke(Object proxy, Method method, Object[] args) {
         log.info("invoked method: [{}]", method.getName());
         RpcRequest rpcRequest = RpcRequest.builder().methodName(method.getName())
                 .parameters(args)

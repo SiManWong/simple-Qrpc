@@ -53,6 +53,7 @@ public class KryoSerializer implements Serializer {
             Kryo kryo = KRYO_THREAD_LOCAL.get();
             Object o = kryo.readObject(input, clazz);
             KRYO_THREAD_LOCAL.remove();
+
             return clazz.cast(o);
         } catch (IOException e) {
             throw new SerializeException("反序列化失败");

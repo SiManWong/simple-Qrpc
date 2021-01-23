@@ -28,6 +28,7 @@ public class RpcRequestHandler {
     public Object handle(RpcRequest rpcRequest) {
         // 通过服务配置信息从服务提供者获取对应服务
         Object service = serviceProvider.getService(rpcRequest.toRpcProperties());
+
         return invokeTargetMethod(rpcRequest, service);
     }
 

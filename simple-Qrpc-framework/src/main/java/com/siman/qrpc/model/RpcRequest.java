@@ -12,8 +12,7 @@ import java.io.Serializable;
  */
 
 @AllArgsConstructor
-@NoArgsConstructor
-@Getter
+@Data
 @Builder
 @ToString
 public class RpcRequest implements Serializable {
@@ -25,6 +24,8 @@ public class RpcRequest implements Serializable {
     private Class<?>[] paramTypes;
     private String version;
     private String group;
+
+    public RpcRequest() {}
 
     public RpcServiceProperties toRpcProperties() {
         return RpcServiceProperties.builder().serviceName(this.getInterfaceName()).build();
