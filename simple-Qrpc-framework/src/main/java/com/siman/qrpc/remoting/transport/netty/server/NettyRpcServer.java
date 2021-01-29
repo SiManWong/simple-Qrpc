@@ -1,12 +1,14 @@
 package com.siman.qrpc.remoting.transport.netty.server;
 
 import com.siman.qrpc.factory.SingletonFactory;
-import com.siman.qrpc.model.RpcRequest;
-import com.siman.qrpc.model.RpcResponse;
+import com.siman.qrpc.registry.ServiceRegistry;
+import com.siman.qrpc.registry.zk.ZkServiceRegistry;
+import com.siman.qrpc.remoting.model.RpcRequest;
+import com.siman.qrpc.remoting.model.RpcResponse;
 import com.siman.qrpc.provider.ServiceProvider;
 import com.siman.qrpc.provider.ServiceProviderImpl;
-import com.siman.qrpc.remoting.transport.netty.codec.kryo.RpcDecoder;
-import com.siman.qrpc.remoting.transport.netty.codec.kryo.RpcEncoder;
+import com.siman.qrpc.remoting.transport.netty.codec.RpcDecoder;
+import com.siman.qrpc.remoting.transport.netty.codec.RpcEncoder;
 import com.siman.qrpc.serialize.impl.KryoSerializer;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
@@ -19,6 +21,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 
 /**
  * 服务端
@@ -28,13 +31,21 @@ import java.net.InetAddress;
  */
 @Slf4j
 public class NettyRpcServer {
-    public static final int PORT = 4396;
+    public static final int PORT = 9998;
+    private static ServiceRegistry serviceRegistry;
+    private static ServiceProvider serviceProvider;
 
-    private final ServiceProvider serviceProvider = SingletonFactory.getInstance(ServiceProviderImpl.class);
+    static {
+        serviceRegistry = SingletonFactory.getInstance(ZkServiceRegistry.class);
+        serviceProvider = SingletonFactory.getInstance(ServiceProviderImpl.class);
+    }
 
     public void registerService(Object service) {
         // 发布服务
-        serviceProvider.publishService(service);
+        serviceProvider.addService(service);
+        Class<?> anInterface = service.getClass().getInterfaces()[0];
+        serviceRegistry.registerService(anInterface.getCanonicalName(),new InetSocketAddress("127.0.0.1", PORT));
+        start();
     }
 
     @SneakyThrows
@@ -58,19 +69,17 @@ public class NettyRpcServer {
             KryoSerializer kryoSerializer = new KryoSerializer();
             bootstrap.group(bossGroup, workerGroup)
                     .channel(NioServerSocketChannel.class)
-//                    // 是否开启 Nagle 算法
-//                    .childOption(ChannelOption.TCP_NODELAY, true)
-//                    // 是否开启 TCP 底层心跳机制
-//                    .childOption(ChannelOption.SO_KEEPALIVE, true)
-//                    // 表示系统用于临时存放已完成三次握手的请求的队列的最大长度,如果连接建立频繁，服务器处理创建新连接较慢，可以适当调大这个参数
-//                    .option(ChannelOption.SO_BACKLOG, 128)
+                    // 是否开启 Nagle 算法
+                    .childOption(ChannelOption.TCP_NODELAY, true)
+                    // 是否开启 TCP 底层心跳机制
+                    .childOption(ChannelOption.SO_KEEPALIVE, true)
+                    // 表示系统用于临时存放已完成三次握手的请求的队列的最大长度,如果连接建立频繁，服务器处理创建新连接较慢，可以适当调大这个参数
+                    .option(ChannelOption.SO_BACKLOG, 128)
                     .handler(new LoggingHandler(LogLevel.DEBUG))
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         protected void initChannel(SocketChannel ch) {
                             ChannelPipeline pipeline = ch.pipeline();
-                            // 30 秒之内没有收到客户端请求就关闭连接
-//                            pipeline.addLast(new IdleStateHandler(30, 0, 0, TimeUnit.SECONDS));
                             // 解码器
                             pipeline.addLast("decode", new RpcDecoder(kryoSerializer, RpcRequest.class));
                             // 编码器

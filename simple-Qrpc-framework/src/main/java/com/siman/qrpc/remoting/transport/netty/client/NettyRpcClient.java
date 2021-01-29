@@ -1,10 +1,14 @@
 package com.siman.qrpc.remoting.transport.netty.client;
 
-import com.siman.qrpc.model.RpcRequest;
-import com.siman.qrpc.model.RpcResponse;
+import com.siman.qrpc.factory.SingletonFactory;
+import com.siman.qrpc.registry.ServiceDiscover;
+import com.siman.qrpc.registry.zk.ZkServiceDiscover;
+import com.siman.qrpc.remoting.model.RpcRequest;
+import com.siman.qrpc.remoting.model.RpcResponse;
+import com.siman.qrpc.remoting.transport.RpcMessageChecker;
 import com.siman.qrpc.remoting.transport.RpcRequestTransport;
-import com.siman.qrpc.remoting.transport.netty.codec.kryo.RpcDecoder;
-import com.siman.qrpc.remoting.transport.netty.codec.kryo.RpcEncoder;
+import com.siman.qrpc.remoting.transport.netty.codec.RpcDecoder;
+import com.siman.qrpc.remoting.transport.netty.codec.RpcEncoder;
 import com.siman.qrpc.serialize.impl.KryoSerializer;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
@@ -13,6 +17,8 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.AttributeKey;
 import lombok.extern.slf4j.Slf4j;
+
+import java.net.InetSocketAddress;
 
 /**
  * 使用final关键字，JVM会对方法、变量及类进行优化。
@@ -24,25 +30,24 @@ import lombok.extern.slf4j.Slf4j;
 public final class NettyRpcClient implements RpcRequestTransport {
 //    private final ServiceDiscovery serviceDiscovery;
 //    private final UnprocessedRequests unprocessedRequests;
-    private final String host;
-    private final int port;
     private final Bootstrap bootstrap;
     private final EventLoopGroup eventLoopGroup;
+    private final ServiceDiscover serviceDiscover;
 
-    public NettyRpcClient(String host, int port) {
-        this.host = host;
-        this.port = port;
+    public NettyRpcClient() {
+        serviceDiscover = SingletonFactory.getInstance(ZkServiceDiscover.class);
         eventLoopGroup = new NioEventLoopGroup();
         bootstrap = new Bootstrap();
         KryoSerializer kryoSerializer = new KryoSerializer();
         bootstrap.group(eventLoopGroup)
                 .channel(NioSocketChannel.class)
+                // 是否开启 TCP 底层心跳机制
                 .option(ChannelOption.SO_KEEPALIVE, true)
                 // 设置超时时间
-//                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 5000)
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 5000)
                 .handler(new ChannelInitializer<SocketChannel>() {
                     @Override
-                    protected void initChannel(SocketChannel ch) throws Exception {
+                    protected void initChannel(SocketChannel ch) {
                         ChannelPipeline pipeline = ch.pipeline();
                         // 15秒钟内没有数据发送到服务器，则发送心跳请求
 //                        pipeline.addLast(new IdleStateHandler(0, 15, 0, TimeUnit.SECONDS));
@@ -64,8 +69,8 @@ public final class NettyRpcClient implements RpcRequestTransport {
     @Override
     public Object sendRpcRequest(RpcRequest rpcRequest) {
         try {
-            ChannelFuture channelFuture = bootstrap.connect(host, port).sync();
-            log.info("client connect {}", host + ":" + port);
+            InetSocketAddress inetSocketAddress = serviceDiscover.lookupService(rpcRequest.getInterfaceName());
+            ChannelFuture channelFuture = bootstrap.connect(inetSocketAddress).sync();
             Channel channel = channelFuture.channel();
             if (channel != null) {
                 channel.writeAndFlush(rpcRequest).addListener(future -> {
@@ -80,6 +85,8 @@ public final class NettyRpcClient implements RpcRequestTransport {
                 // 将服务端返回的数据也就是 RpcResponse 对象取出
                 AttributeKey<RpcResponse> key = AttributeKey.valueOf("rpcResponse" + rpcRequest.getRequestId());
                 RpcResponse rpcResponse = channel.attr(key).get();
+                // 校验 RpcRequest 和 RpcResponse
+                RpcMessageChecker.check(rpcResponse, rpcRequest);
 
                 return rpcResponse;
             }
