@@ -1,9 +1,6 @@
 package com.siman.qrpc.remoting.transport.netty.client;
 
-import com.siman.qrpc.factory.SingletonFactory;
-import com.siman.qrpc.model.RpcMessage;
-import com.siman.qrpc.model.RpcResponse;
-import com.siman.qrpc.remoting.constans.RpcConstants;
+import com.siman.qrpc.remoting.model.RpcResponse;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.AttributeKey;
@@ -52,7 +49,7 @@ public class NettyRpcClientHandler extends ChannelInboundHandlerAdapter {
      * 处理客户端消息发生异常的时候被调用
      */
     @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         log.error("client catch exception：", cause);
         cause.printStackTrace();
         ctx.close();

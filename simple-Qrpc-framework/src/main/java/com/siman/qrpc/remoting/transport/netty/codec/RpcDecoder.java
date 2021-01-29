@@ -1,4 +1,4 @@
-package com.siman.qrpc.remoting.transport.netty.codec.kryo;
+package com.siman.qrpc.remoting.transport.netty.codec;
 
 import com.siman.qrpc.serialize.Serializer;
 import io.netty.buffer.ByteBuf;

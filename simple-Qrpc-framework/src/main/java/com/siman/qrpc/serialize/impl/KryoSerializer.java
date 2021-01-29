@@ -4,8 +4,8 @@ import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 import com.siman.qrpc.exception.SerializeException;
-import com.siman.qrpc.model.RpcRequest;
-import com.siman.qrpc.model.RpcResponse;
+import com.siman.qrpc.remoting.model.RpcRequest;
+import com.siman.qrpc.remoting.model.RpcResponse;
 import com.siman.qrpc.serialize.Serializer;
 import com.siman.qrpc.serialize.SerializerAlgorithm;
 

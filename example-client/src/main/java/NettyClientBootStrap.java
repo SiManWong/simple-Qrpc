@@ -11,7 +11,7 @@ import com.siman.qrpc.service.HelloService;
 
 public class NettyClientBootStrap {
     public static void main(String[] args) {
-        RpcRequestTransport rpcRequestTransport = new NettyRpcClient("127.0.0.1",4396);
+        RpcRequestTransport rpcRequestTransport = new NettyRpcClient();
         RpcClientProxy rpcClientProxy = new RpcClientProxy(rpcRequestTransport);
         HelloService helloService = rpcClientProxy.getProxy(HelloService.class);
         String hello = helloService.hello(new Hello("消息", "描述"));

@@ -1,12 +1,9 @@
 package com.siman.qrpc.remoting.transport.netty.server;
 
-import com.siman.qrpc.enums.RpcResponseCodeEnum;
-import com.siman.qrpc.enums.SerializationTypeEnum;
 import com.siman.qrpc.factory.SingletonFactory;
-import com.siman.qrpc.handler.RpcRequestHandler;
-import com.siman.qrpc.model.RpcMessage;
-import com.siman.qrpc.model.RpcRequest;
-import com.siman.qrpc.model.RpcResponse;
+import com.siman.qrpc.remoting.handler.RpcRequestHandler;
+import com.siman.qrpc.remoting.model.RpcRequest;
+import com.siman.qrpc.remoting.model.RpcResponse;
 import com.siman.qrpc.util.threadpool.ThreadPoolFactoryUtils;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
@@ -73,6 +70,9 @@ public class NettyRpcServerHandler extends ChannelInboundHandlerAdapter {
 //    }
 
 
+    /**
+     * 读取从客户端消息，然后调用目标服务的目标方法并返回给客户端。
+     */
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
         threadPool.execute(() -> {

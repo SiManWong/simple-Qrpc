@@ -1,4 +1,5 @@
 import com.siman.qrpc.remoting.transport.netty.server.NettyRpcServer;
+import com.siman.qrpc.service.HelloService;
 import com.siman.qrpc.serviceimpl.HelloServiceImpl;
 
 /**
@@ -8,9 +9,8 @@ import com.siman.qrpc.serviceimpl.HelloServiceImpl;
 
 public class NettyServerBootStrap {
     public static void main(String[] args) {
-        HelloServiceImpl helloService = new HelloServiceImpl();
+        HelloService helloService = new HelloServiceImpl();
         NettyRpcServer nettyRpcServer = new NettyRpcServer();
         nettyRpcServer.registerService(helloService);
-        nettyRpcServer.start();
     }
 }

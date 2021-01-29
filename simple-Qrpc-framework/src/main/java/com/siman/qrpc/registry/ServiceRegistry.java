@@ -1,5 +1,7 @@
 package com.siman.qrpc.registry;
 
+import java.net.InetSocketAddress;
+
 /**
  * @author SiMan
  * @date 2021/1/20 22:50
@@ -8,15 +10,9 @@ package com.siman.qrpc.registry;
 public interface ServiceRegistry {
     /**
      * 注册服务
-     * @param service
-     * @param <T>
+     *
+     * @param rpcServiceName       服务名称
+     * @param inetSocketAddress 提供服务的地址
      */
-    <T> void register(T service);
-
-    /**
-     * 获取服务
-     * @param serviceName
-     * @return
-     */
-    Object getService(String serviceName);
+    void registerService(String rpcServiceName, InetSocketAddress inetSocketAddress);
 }
