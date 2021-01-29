@@ -1,8 +1,8 @@
-package com.siman.qrpc.handler;
+package com.siman.qrpc.remoting.handler;
 
 import com.siman.qrpc.exception.RpcException;
 import com.siman.qrpc.factory.SingletonFactory;
-import com.siman.qrpc.model.RpcRequest;
+import com.siman.qrpc.remoting.model.RpcRequest;
 import com.siman.qrpc.provider.ServiceProvider;
 import com.siman.qrpc.provider.ServiceProviderImpl;
 import lombok.extern.slf4j.Slf4j;

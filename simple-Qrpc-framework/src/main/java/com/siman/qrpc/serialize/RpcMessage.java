@@ -1,4 +1,4 @@
-package com.siman.qrpc.model;
+package com.siman.qrpc.serialize;
 
 import lombok.*;
 

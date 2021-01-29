@@ -10,9 +10,9 @@ import lombok.ToString;
 public enum RpcResponseCodeEnum {
 
     // 成功
-    SUCCESS(200, "The remote call is successful"),
+    SUCCESS(200, "调用方法成功"),
     // 失败
-    FAIL(500, "The remote call is fail");
+    FAIL(500, "调用方法失败");
 
     private final int code;
 

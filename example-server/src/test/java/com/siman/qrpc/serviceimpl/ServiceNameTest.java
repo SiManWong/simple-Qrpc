@@ -1,7 +1,7 @@
 package com.siman.qrpc.serviceimpl;
 
 import com.siman.qrpc.service.HelloService;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author SiMan
@@ -10,11 +10,21 @@ import org.junit.Test;
 
 public class ServiceNameTest {
     @Test
-    public void serviceName() {
+    void serviceName() {
         HelloService service = new HelloServiceImpl();
         Class<?> serviceRelatedInterface = service.getClass().getInterfaces()[0];
         String serviceName = serviceRelatedInterface.getCanonicalName();
 
         System.out.println(serviceName);
+    }
+
+    @Test
+    void interfaceName() {
+        HelloService service = new HelloServiceImpl();
+        System.out.println("HelloService.class: " + HelloService.class);
+        System.out.println("service.getClass(): " + service.getClass());
+        System.out.println("service.getClass().getInterfaces()[0].getCanonicalName(): " + service.getClass().getInterfaces()[0].getCanonicalName());
+        System.out.println("service.getClass().getInterfaces()[0].getCanonicalName(): " + service.getClass().getInterfaces()[0].getCanonicalName());
+        System.out.println();
     }
 }

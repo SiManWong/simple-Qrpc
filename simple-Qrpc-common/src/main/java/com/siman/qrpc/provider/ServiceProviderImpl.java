@@ -3,10 +3,8 @@ package com.siman.qrpc.provider;
 import com.siman.qrpc.entity.RpcServiceProperties;
 import com.siman.qrpc.enums.RpcErrorMessageEnum;
 import com.siman.qrpc.exception.RpcException;
-import com.siman.qrpc.factory.SingletonFactory;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.imageio.spi.ServiceRegistry;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Map;
@@ -14,6 +12,8 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
+ * 默认的服务注册中心实现，通过 Map 保存服务信息，可以通过 zookeeper 来改进
+ * 实现了 ServiceProvider 接口，可以将其看做是一个保存和提供服务实例对象的示例
  * @author SiMan
  * @date 2020/12/28 1:57
  */
@@ -40,6 +40,18 @@ public class ServiceProviderImpl implements ServiceProvider{
     @Override
     public void addService(Object service, Class<?> serviceClass, RpcServiceProperties rpcServiceProperties) {
         String rpcServiceName = rpcServiceProperties.toRpcServiceName();
+        if (registeredService.contains(rpcServiceName)) {
+            return;
+        }
+        registeredService.add(rpcServiceName);
+        serviceMap.put(rpcServiceName, service);
+        log.info("Add service: {} and interfaces:{}", rpcServiceName, service.getClass().getInterfaces());
+    }
+
+    @Override
+    public void addService(Object service) {
+        Class<?> serviceRelatedInterface = service.getClass().getInterfaces()[0];
+        String rpcServiceName = serviceRelatedInterface.getCanonicalName();
         if (registeredService.contains(rpcServiceName)) {
             return;
         }

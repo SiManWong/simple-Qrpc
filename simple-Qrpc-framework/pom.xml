@@ -15,8 +15,6 @@
             <groupId>com.siman.qrpc</groupId>
             <artifactId>simple-Qrpc-common</artifactId>
             <version>${project.version}</version>
-            <type>jar</type>
-            <classifier>api</classifier>
         </dependency>
         <dependency>
             <groupId>io.netty</groupId>

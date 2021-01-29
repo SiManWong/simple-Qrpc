@@ -1,6 +1,6 @@
-package com.siman.qrpc.transport;
+package com.siman.qrpc.remoting.transport;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -12,7 +12,7 @@ import java.net.UnknownHostException;
 
 public class InetAddressTest {
     @Test
-    public void getHostAddress() {
+    void getHostAddress() {
         try {
             String hostAddress = InetAddress.getLocalHost().getHostAddress();
             System.out.println(hostAddress);

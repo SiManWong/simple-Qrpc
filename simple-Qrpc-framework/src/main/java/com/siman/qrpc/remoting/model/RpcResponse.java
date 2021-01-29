@@ -1,4 +1,4 @@
-package com.siman.qrpc.model;
+package com.siman.qrpc.remoting.model;
 
 import com.siman.qrpc.enums.RpcResponseCodeEnum;
 import lombok.*;
