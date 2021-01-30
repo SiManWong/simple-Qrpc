@@ -20,12 +20,25 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Slf4j
 public final class CuratorUtils {
+    /**
+     * 重试间隔初始时间
+     */
     private static final int BASE_SLEEP_TIME = 1000;
+    /**
+     * 最大重试次数
+     */
     private static final int MAX_RETRIES = 3;
-    private static final String CONNECT_STRING = "120.24.61.20:2181";
+    /**
+     * 根目录
+     */
     public static final String ZK_REGISTER_ROOT_PATH = "/my-rpc";
+    private static final String CONNECT_STRING = "120.24.61.20:2181";
     private static Map<String, List<String>> serviceAddressMap = new ConcurrentHashMap<>();
-    private static CuratorFramework zkClient = getZkClient();
+    private static CuratorFramework zkClient;
+
+    static {
+        zkClient = getZkClient();
+    }
 
     private CuratorUtils() {}
 
@@ -44,7 +57,7 @@ public final class CuratorUtils {
     /**
      * 创建临时节点
      * 临时节点贮存在 Zookeeper 中，当连接和 session 断掉时被删除
-     * @param path
+     * @param path 节点路径
      */
     public static void createEphemeralNode(String path) {
         try {
@@ -61,13 +74,16 @@ public final class CuratorUtils {
 
     /**
      * 获取某个节点下的子节点，也就是获取所有提供服务的生产者的地址
+     *
+     * @param serviceName 服务对象接口名 eg:com.siman.qrpc.service.HelloService
+     * @return 指定节点下的所有子节点
      */
     public static List<String> getChildrenNodes(String serviceName) {
         if (serviceAddressMap.containsKey(serviceName)) {
             return serviceAddressMap.get(serviceName);
         }
         List<String> result;
-        String servicePath = CuratorUtils.ZK_REGISTER_ROOT_PATH + "/" + serviceName;
+        String servicePath = ZK_REGISTER_ROOT_PATH + "/" + serviceName;
         try {
             result = zkClient.getChildren().forPath(servicePath);
             serviceAddressMap.put(serviceName, result);
@@ -80,10 +96,12 @@ public final class CuratorUtils {
     }
 
     /**
-     * 注册监听
+     * 注册监听指定节点
+     *
+     * @param serviceName 服务对象接口名 eg:
      */
     public static void registerWatch(CuratorFramework zkClient, String serviceName) {
-        String servicePath = CuratorUtils.ZK_REGISTER_ROOT_PATH + "/" + serviceName;
+        String servicePath = ZK_REGISTER_ROOT_PATH + "/" + serviceName;
         PathChildrenCache pathChildrenCache = new PathChildrenCache(zkClient, servicePath, true);
         PathChildrenCacheListener pathChildrenCacheListener = (curatorFramework, pathChildrenCacheEvent) -> {
             List<String> serviceAddresses = curatorFramework.getChildren().forPath(servicePath);
