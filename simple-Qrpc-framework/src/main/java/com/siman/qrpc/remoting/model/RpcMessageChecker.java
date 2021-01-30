@@ -1,10 +1,8 @@
-package com.siman.qrpc.remoting.transport;
+package com.siman.qrpc.remoting.model;
 
 import com.siman.qrpc.enums.RpcErrorMessageEnum;
 import com.siman.qrpc.enums.RpcResponseCodeEnum;
 import com.siman.qrpc.exception.RpcException;
-import com.siman.qrpc.remoting.model.RpcRequest;
-import com.siman.qrpc.remoting.model.RpcResponse;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -18,11 +16,15 @@ public class RpcMessageChecker {
     private RpcMessageChecker() {}
 
     public static void check(RpcResponse rpcResponse, RpcRequest rpcRequest) {
+        if (rpcResponse == null) {
+            throw new RpcException(RpcErrorMessageEnum.SERVICE_INVOCATION_FAILURE, INTERFACE_NAME + ":" + rpcRequest.getInterfaceName());
+        }
+
         if (!rpcRequest.getRequestId().equals(rpcResponse.getRequestId())) {
             throw new RpcException(RpcErrorMessageEnum.REQUEST_NOT_MATCH_RESPONSE, INTERFACE_NAME + ":" + rpcRequest.getInterfaceName());
         }
 
-        if (rpcResponse == null || !rpcResponse.getCode().equals(RpcResponseCodeEnum.SUCCESS.getCode())) {
+        if (rpcResponse.getCode() == null || !rpcResponse.getCode().equals(RpcResponseCodeEnum.SUCCESS.getCode())) {
             throw new RpcException(RpcErrorMessageEnum.SERVICE_INVOCATION_FAILURE, INTERFACE_NAME + ":" + rpcRequest.getInterfaceName());
         }
     }
