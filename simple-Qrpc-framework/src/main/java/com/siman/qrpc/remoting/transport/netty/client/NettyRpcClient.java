@@ -47,6 +47,8 @@ public final class NettyRpcClient implements RpcRequestTransport {
                 .option(ChannelOption.SO_KEEPALIVE, true)
                 // 设置超时时间
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 5000)
+                //TCP默认开启了 Nagle 算法，该算法的作用是尽可能的发送大数据快，减少网络传输。TCP_NODELAY 参数的作用就是控制是否启用 Nagle 算法。
+                .option(ChannelOption.TCP_NODELAY, true)
                 .handler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     protected void initChannel(SocketChannel ch) {
@@ -84,7 +86,7 @@ public final class NettyRpcClient implements RpcRequestTransport {
      * @return 服务端返回的数据
      */
     @Override
-    public Object sendRpcRequest(RpcRequest rpcRequest) {
+    public CompletableFuture<RpcResponse> sendRpcRequest(RpcRequest rpcRequest) {
         // 构建返回值
         CompletableFuture<RpcResponse> resultFuture = new CompletableFuture<>();
         // 从注册中心获取服务地址

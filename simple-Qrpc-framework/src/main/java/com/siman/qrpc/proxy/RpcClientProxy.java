@@ -29,7 +29,6 @@ public class RpcClientProxy implements InvocationHandler {
      * 用于发送请求给服务端，对应socket和netty两种实现方式
      */
     private final RpcRequestTransport rpcRequestTransport;
-    private final RpcServiceProperties serviceProperties;
 
     public RpcClientProxy(RpcRequestTransport rpcRequestTransport, RpcServiceProperties rpcServiceProperties) {
         this.rpcRequestTransport = rpcRequestTransport;
@@ -39,12 +38,10 @@ public class RpcClientProxy implements InvocationHandler {
 //        if (rpcServiceProperties.getVersion() == null) {
 //            rpcServiceProperties.setVersion("");
 //        }
-        this.serviceProperties = rpcServiceProperties;
     }
 
     public RpcClientProxy(RpcRequestTransport rpcRequestTransport) {
         this.rpcRequestTransport = rpcRequestTransport;
-        this.serviceProperties = RpcServiceProperties.builder().build();
     }
 
     /**

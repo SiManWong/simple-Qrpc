@@ -1,5 +1,6 @@
 package com.siman.qrpc.remoting.transport.netty.server;
 
+import com.siman.qrpc.config.CustomShutdownHook;
 import com.siman.qrpc.factory.SingletonFactory;
 import com.siman.qrpc.registry.ServiceRegistry;
 import com.siman.qrpc.registry.zk.ZkServiceRegistry;
@@ -52,7 +53,6 @@ public class NettyRpcServer {
     public void start() {
         // 服务器关闭后，注销所有服务
 //        CustomShutdownHook.getCustomShutdownHook().clearAll();
-        String host = InetAddress.getLocalHost().getHostAddress();
         String localHost = "127.0.0.1";
 
         EventLoopGroup bossGroup = new NioEventLoopGroup(1);

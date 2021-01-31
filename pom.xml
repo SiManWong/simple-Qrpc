@@ -25,7 +25,7 @@
         <guava.version>29.0-jre</guava.version>
         <checkstyle-maven-plugin.version>3.1.1</checkstyle-maven-plugin.version>
         <spring.version>5.2.7.RELEASE</spring.version>
-        <curator-version>4.2.0</curator-version>
+        <curator-version>4.0.1</curator-version>
         <!-- test -->
         <junit.jupiter.version>5.5.2</junit.jupiter.version>
         <junit.platform.version>1.5.2</junit.platform.version>
@@ -73,5 +73,6 @@
             <version>${junit.platform.version}</version>
             <scope>test</scope>
         </dependency>
+
     </dependencies>
 </project>
