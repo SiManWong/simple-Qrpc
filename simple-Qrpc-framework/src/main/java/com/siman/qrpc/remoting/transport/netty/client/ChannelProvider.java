@@ -25,6 +25,8 @@ public class ChannelProvider {
         nettyRpcClient = SingletonFactory.getInstance(NettyRpcClient.class);
     }
 
+    private ChannelProvider() {}
+
     public static Channel get(InetSocketAddress inetSocketAddress) {
         String key = inetSocketAddress.toString();
         // 判断是否有对应地址的连接

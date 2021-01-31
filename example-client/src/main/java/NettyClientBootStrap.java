@@ -10,11 +10,15 @@ import com.siman.qrpc.service.HelloService;
  */
 
 public class NettyClientBootStrap {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
         RpcRequestTransport rpcRequestTransport = new NettyRpcClient();
         RpcClientProxy rpcClientProxy = new RpcClientProxy(rpcRequestTransport);
         HelloService helloService = rpcClientProxy.getProxy(HelloService.class);
-        String hello = helloService.hello(new Hello("消息", "描述"));
-        System.out.println(hello);
+//        String des = helloService.hello(new Hello("111", "~~~"));
+//        System.out.println(des);
+        for (int i = 0; i < 150; i++) {
+            String des = helloService.hello(new Hello("111", "~~~" + i));
+            System.out.println(des);
+        }
     }
 }

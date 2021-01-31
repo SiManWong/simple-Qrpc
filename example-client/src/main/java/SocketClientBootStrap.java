@@ -16,7 +16,9 @@ public class SocketClientBootStrap {
         RpcServiceProperties rpcServiceProperties = RpcServiceProperties.builder().build();
         RpcClientProxy rpcClientProxy = new RpcClientProxy(rpcRequestTransport, rpcServiceProperties);
         HelloService helloService = rpcClientProxy.getProxy(HelloService.class);
-        String hello = helloService.hello(new Hello("消息", "描述"));
-        System.out.println(hello);
+        for (int i = 0; i < 50; i++) {
+            String hello = helloService.hello(new Hello("消息", "描述"));
+            System.out.println(hello);
+        }
     }
 }

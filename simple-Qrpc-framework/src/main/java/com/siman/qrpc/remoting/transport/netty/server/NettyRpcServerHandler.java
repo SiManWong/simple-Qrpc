@@ -4,17 +4,12 @@ import com.siman.qrpc.factory.SingletonFactory;
 import com.siman.qrpc.remoting.handler.RpcRequestHandler;
 import com.siman.qrpc.remoting.model.RpcRequest;
 import com.siman.qrpc.remoting.model.RpcResponse;
-import com.siman.qrpc.util.threadpool.ThreadPoolFactoryUtils;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelFutureListener;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.channel.*;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
 import io.netty.util.ReferenceCountUtil;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.concurrent.ExecutorService;
 
 /**
  * 自定义服务端的 ChannelHandler 来处理客户端发过来的数据
@@ -24,10 +19,8 @@ import java.util.concurrent.ExecutorService;
 @Slf4j
 public class NettyRpcServerHandler extends ChannelInboundHandlerAdapter {
     private final RpcRequestHandler rpcRequestHandler;
-    private final ExecutorService threadPool;
 
     public NettyRpcServerHandler() {
-        threadPool = ThreadPoolFactoryUtils.createCustomThreadPoolIfAbsent("netty-server-handler-rpc-pool");
         this.rpcRequestHandler = SingletonFactory.getInstance(RpcRequestHandler.class);
     }
 
@@ -75,22 +68,25 @@ public class NettyRpcServerHandler extends ChannelInboundHandlerAdapter {
      */
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
-        threadPool.execute(() -> {
-            log.info(String.format("server handle message from client by thread: %s", Thread.currentThread().getName()));
-            try {
-                RpcRequest rpcRequest = (RpcRequest) msg;
-                log.info(String.format("server receive msg: %s", rpcRequest));
-                //执行目标方法（客户端需要执行的方法）并且返回方法结果
-                Object result = rpcRequestHandler.handle(rpcRequest);
-                log.info(String.format("server get result: %s", result.toString()));
-                // TODO 勿将result作为响应发送到客户端，导致 codec 与 clientHandler 不起作用
-                ChannelFuture channelFuture = ctx.writeAndFlush(RpcResponse.success(result, rpcRequest.getRequestId()));
-                channelFuture.addListener(ChannelFutureListener.CLOSE);
-            } finally {
-                //确保 ByteBuf 被释放，不然可能会有内存泄露问题
-                ReferenceCountUtil.release(msg);
+        log.info(String.format("server handle message from client by thread: %s", Thread.currentThread().getName()));
+        try {
+            RpcRequest rpcRequest = (RpcRequest) msg;
+            log.info(String.format("server receive msg: %s", rpcRequest));
+            //执行目标方法（客户端需要执行的方法）并且返回方法结果
+            Object result = rpcRequestHandler.handle(rpcRequest);
+            log.info(String.format("server get result: %s", result.toString()));
+            if (ctx.channel().isActive() && ctx.channel().isWritable()) {
+                // 将 result 封装为 RpcResponse 响应给客户端
+                RpcResponse<Object> rpcResponse = RpcResponse.success(result, rpcRequest.getRequestId());
+                ctx.writeAndFlush(rpcResponse).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
+            } else {
+                log.error("not writable now, message dropped");
             }
-        });
+        } finally {
+            //确保 ByteBuf 被释放，不然可能会有内存泄露问题
+            ReferenceCountUtil.release(msg);
+        }
+
     }
 
     @Override

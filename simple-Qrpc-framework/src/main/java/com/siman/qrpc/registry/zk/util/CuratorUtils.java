@@ -87,7 +87,7 @@ public final class CuratorUtils {
         try {
             result = zkClient.getChildren().forPath(servicePath);
             serviceAddressMap.put(serviceName, result);
-            registerWatch(zkClient, serviceName);
+            registerWatcher(zkClient, serviceName);
         } catch (Exception exception) {
             throw new RpcException(exception.getMessage(), exception.getCause());
         }
@@ -100,7 +100,7 @@ public final class CuratorUtils {
      *
      * @param serviceName 服务对象接口名 eg:
      */
-    public static void registerWatch(CuratorFramework zkClient, String serviceName) {
+    private static void registerWatcher(CuratorFramework zkClient, String serviceName) {
         String servicePath = ZK_REGISTER_ROOT_PATH + "/" + serviceName;
         PathChildrenCache pathChildrenCache = new PathChildrenCache(zkClient, servicePath, true);
         PathChildrenCacheListener pathChildrenCacheListener = (curatorFramework, pathChildrenCacheEvent) -> {
@@ -110,8 +110,8 @@ public final class CuratorUtils {
         pathChildrenCache.getListenable().addListener(pathChildrenCacheListener);
         try {
             pathChildrenCache.start();
-        } catch (Exception exception) {
-            log.error("occur exception", exception);
+        } catch (Exception e) {
+            throw new RpcException(e.getMessage(), e.getCause());
         }
     }
 }

@@ -11,7 +11,7 @@ import com.siman.qrpc.service.HelloService;
 public class HelloServiceImpl implements HelloService {
     @Override
     public String hello(Hello hello) {
-        String result = hello.getMessage();
+        String result = "Hello description is " +hello.getDescription();
 
         return result;
     }
