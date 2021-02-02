@@ -1,0 +1,25 @@
+package com.siman.qrpc.config;
+
+import com.siman.qrpc.util.threadpool.ThreadPoolFactoryUtils;
+import lombok.extern.slf4j.Slf4j;
+
+/**
+ * @author SiMan
+ * @date 2021/1/31 2:01
+ */
+@Slf4j
+public class CustomShutdownHook {
+    private static final CustomShutdownHook CUSTOM_SHUTDOWN_HOOK = new CustomShutdownHook();
+
+    public static CustomShutdownHook getCustomShutdownHook() {
+        return CUSTOM_SHUTDOWN_HOOK;
+    }
+
+    public void clearAll() {
+        log.info("addShutdownHook for clearAll");
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+//            CuratorUtils.clearRegistry();
+            ThreadPoolFactoryUtils.shutDownAllThreadPool();
+        }));
+    }
+}

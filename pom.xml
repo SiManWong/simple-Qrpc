@@ -14,6 +14,7 @@
         <module>example-server</module>
         <module>example-client</module>
         <module>public-interface-api</module>
+        <module>simple-Qrpc-spring</module>
     </modules>
 
     <properties>
@@ -25,7 +26,7 @@
         <guava.version>29.0-jre</guava.version>
         <checkstyle-maven-plugin.version>3.1.1</checkstyle-maven-plugin.version>
         <spring.version>5.2.7.RELEASE</spring.version>
-        <curator-version>4.0.1</curator-version>
+        <curator-version>4.2.0</curator-version>
         <!-- test -->
         <junit.jupiter.version>5.5.2</junit.jupiter.version>
         <junit.platform.version>1.5.2</junit.platform.version>

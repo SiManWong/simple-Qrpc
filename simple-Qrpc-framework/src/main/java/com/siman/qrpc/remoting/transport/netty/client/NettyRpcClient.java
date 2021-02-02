@@ -15,12 +15,16 @@ import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.logging.LogLevel;
+import io.netty.handler.logging.LoggingHandler;
+import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.AttributeKey;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.InetSocketAddress;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 使用final关键字，JVM会对方法、变量及类进行优化。
@@ -43,16 +47,15 @@ public final class NettyRpcClient implements RpcRequestTransport {
         // bootstrap 引导 Netty 配置
         bootstrap.group(eventLoopGroup)
                 .channel(NioSocketChannel.class)
-                // 是否开启 TCP 底层心跳机制
-                .option(ChannelOption.SO_KEEPALIVE, true)
+                .handler(new LoggingHandler(LogLevel.INFO))
                 // 设置超时时间
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 5000)
-                //TCP默认开启了 Nagle 算法，该算法的作用是尽可能的发送大数据快，减少网络传输。TCP_NODELAY 参数的作用就是控制是否启用 Nagle 算法。
-                .option(ChannelOption.TCP_NODELAY, true)
                 .handler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     protected void initChannel(SocketChannel ch) {
                         ChannelPipeline pipeline = ch.pipeline();
+                        // 5 秒内没有发送数据给服务端的话，就发送一次心跳请求
+                        pipeline.addLast(new IdleStateHandler(0,5,0, TimeUnit.SECONDS));
                         // 解码器
                         pipeline.addLast("decode", new RpcDecoder(kryoSerializer, RpcResponse.class));
                         // 编码器
