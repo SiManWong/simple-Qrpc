@@ -1,5 +1,6 @@
 package com.siman.qrpc.remoting.transport.netty.server;
 
+import com.siman.qrpc.enums.RpcMessageTypeEnum;
 import com.siman.qrpc.factory.SingletonFactory;
 import com.siman.qrpc.remoting.handler.RpcRequestHandler;
 import com.siman.qrpc.remoting.model.RpcRequest;
@@ -68,10 +69,13 @@ public class NettyRpcServerHandler extends ChannelInboundHandlerAdapter {
      */
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
-        log.info(String.format("server handle message from client by thread: %s", Thread.currentThread().getName()));
         try {
             RpcRequest rpcRequest = (RpcRequest) msg;
             log.info(String.format("server receive msg: %s", rpcRequest));
+            if (rpcRequest.getRpcMessageTypeEnum() == RpcMessageTypeEnum.HEART_BEAT) {
+                log.info("receive heat beat msg from client");
+                return;
+            }
             //执行目标方法（客户端需要执行的方法）并且返回方法结果
             Object result = rpcRequestHandler.handle(rpcRequest);
             log.info(String.format("server get result: %s", result.toString()));
@@ -94,7 +98,7 @@ public class NettyRpcServerHandler extends ChannelInboundHandlerAdapter {
         if (evt instanceof IdleStateEvent) {
             IdleState state = ((IdleStateEvent) evt).state();
             if (state == IdleState.READER_IDLE) {
-                log.info("idle check happen, so close the connection");
+                log.info("idle check happen, so close the conneciton");
                 ctx.close();
             } else {
                 super.userEventTriggered(ctx, evt);

@@ -30,15 +30,13 @@ public class SocketRpcServer {
     }
 
     public void registerService(Object service) {
-        serviceProvider.publishService(service);
+        serviceProvider.addService(service);
     }
 
     public void start() {
         try (ServerSocket server = new ServerSocket()) {
-//            String host = InetAddress.getLocalHost().getHostAddress();
             String host = "127.0.0.1";
             server.bind(new InetSocketAddress(host, PORT));
-//            CustomShutdownHook.getCustomShutdownHook().clearAll();
             Socket socket;
             // 获取新的连接，此处会阻塞
             while ((socket = server.accept()) != null) {

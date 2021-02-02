@@ -16,9 +16,11 @@ public class NettyClientBootStrap {
         HelloService helloService = rpcClientProxy.getProxy(HelloService.class);
 //        String des = helloService.hello(new Hello("111", "~~~"));
 //        System.out.println(des);
-        for (int i = 0; i < 150; i++) {
+        for (int i = 0; i < 5; i++) {
             String des = helloService.hello(new Hello("111", "~~~" + i));
             System.out.println(des);
+            Thread.sleep(1000);
         }
+
     }
 }
