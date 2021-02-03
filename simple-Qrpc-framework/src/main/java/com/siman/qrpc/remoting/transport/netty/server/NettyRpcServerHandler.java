@@ -1,6 +1,6 @@
 package com.siman.qrpc.remoting.transport.netty.server;
 
-import com.siman.qrpc.enums.RpcMessageTypeEnum;
+import com.siman.qrpc.enums.RpcMessageType;
 import com.siman.qrpc.factory.SingletonFactory;
 import com.siman.qrpc.remoting.handler.RpcRequestHandler;
 import com.siman.qrpc.remoting.model.RpcRequest;
@@ -72,7 +72,7 @@ public class NettyRpcServerHandler extends ChannelInboundHandlerAdapter {
         try {
             RpcRequest rpcRequest = (RpcRequest) msg;
             log.info(String.format("server receive msg: %s", rpcRequest));
-            if (rpcRequest.getRpcMessageTypeEnum() == RpcMessageTypeEnum.HEART_BEAT) {
+            if (rpcRequest.getRpcMessageType() == RpcMessageType.HEART_BEAT) {
                 log.info("receive heat beat msg from client");
                 return;
             }

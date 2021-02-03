@@ -1,19 +1,18 @@
 package com.siman.qrpc.serviceimpl;
 
-import com.siman.qrpc.spring.annotation.RpcService;
 import com.siman.qrpc.pojo.Hello;
 import com.siman.qrpc.service.HelloService;
+import com.siman.qrpc.spring.annotation.RpcService;
 
 /**
  * @author SiMan
- * @date 2021/1/17 2:08
+ * @date 2021/2/2 21:17
  */
-
-@RpcService(group = "test1", version = "1.0")
-public class HelloServiceImpl implements HelloService {
+@RpcService(group = "test2", version = "1.0")
+public class HelloServiceImpl2 implements HelloService {
 
     static {
-        System.out.println("HelloServiceImpl被创建");
+        System.out.println("HelloServiceImpl2被创建");
     }
 
     @Override

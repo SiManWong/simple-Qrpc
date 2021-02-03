@@ -19,11 +19,24 @@ public interface ServiceProvider {
      * @param service
      * @param serviceClass
      */
-    void addService(Object service, Class<?> serviceClass);
+    void addService(Object service, Class<?> serviceClass, RpcServiceProperties rpcServiceProperties);
     /**
      * 获取服务
      * @param rpcServiceProperties 服务相关配置
      * @return service object
      */
     Object getService(RpcServiceProperties rpcServiceProperties);
+
+    /**
+     * 发布服务
+     * @param service              service object
+     * @param rpcServiceProperties service related attributes
+     */
+    void publishService(Object service, RpcServiceProperties rpcServiceProperties);
+
+    /**
+     * 发布服务
+     * @param service service object
+     */
+    void publishService(Object service);
 }

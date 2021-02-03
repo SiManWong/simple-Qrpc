@@ -7,7 +7,7 @@ package com.siman.qrpc.enums;
  * @date 2021/1/20 15:17
  */
 
-public enum SerializationTypeEnum {
+public enum SerializationType {
     // kyro
     KYRO((byte) 0x01, "kyro"),
     // protostuff
@@ -16,7 +16,7 @@ public enum SerializationTypeEnum {
     private final byte code;
     private final String name;
 
-    SerializationTypeEnum(byte code, String name) {
+    SerializationType(byte code, String name) {
         this.code = code;
         this.name = name;
     }
@@ -30,7 +30,7 @@ public enum SerializationTypeEnum {
     }
 
     public static String getName(byte code) {
-        for (SerializationTypeEnum c : SerializationTypeEnum.values()) {
+        for (SerializationType c : SerializationType.values()) {
             if (c.getCode() == code) {
                 return c.name;
             }

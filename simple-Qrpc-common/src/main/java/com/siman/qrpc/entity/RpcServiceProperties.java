@@ -16,8 +16,19 @@ import lombok.NoArgsConstructor;
 @Data
 public class RpcServiceProperties {
     private String serviceName;
+    /**
+     * 服务版本号
+     */
+    private String version;
+    /**
+     * 一个接口有多个实现类时，按组区分
+     */
+    private String group;
 
+    /**
+     * @return 最终的服务名
+     */
     public String toRpcServiceName() {
-        return this.getServiceName();
+        return this.getServiceName() + this.getGroup() + this.getVersion();
     }
 }

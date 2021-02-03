@@ -2,6 +2,7 @@ package com.siman.qrpc.registry.zk;
 
 import com.siman.qrpc.registry.ServiceRegistry;
 import com.siman.qrpc.registry.zk.util.CuratorUtils;
+import org.apache.curator.framework.CuratorFramework;
 
 import java.net.InetSocketAddress;
 
@@ -14,6 +15,7 @@ public class ZkServiceRegistry implements ServiceRegistry {
     @Override
     public void registerService(String rpcServiceName, InetSocketAddress inetSocketAddress) {
         String servicePath = CuratorUtils.ZK_REGISTER_ROOT_PATH + "/" + rpcServiceName + inetSocketAddress.toString();
-        CuratorUtils.createEphemeralNode(servicePath);
+        CuratorFramework zkClient = CuratorUtils.getZkClient();
+        CuratorUtils.createEphemeralNode(zkClient, servicePath);
     }
 }

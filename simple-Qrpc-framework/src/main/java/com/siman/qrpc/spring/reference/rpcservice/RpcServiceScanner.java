@@ -1,6 +1,6 @@
-package com.siman.qrpc.spring.rpcservice;
+package com.siman.qrpc.spring.reference.rpcservice;
 
-import com.siman.qrpc.spring.annotation.RpcServiceScan;
+import com.siman.qrpc.spring.annotation.Reference;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
@@ -58,8 +58,8 @@ public class RpcServiceScanner extends ClassPathBeanDefinitionScanner {
      */
     protected void registerFilters() {
         // 传入注解过滤器 AnnotationTypeFilter
-        addIncludeFilter(new AnnotationTypeFilter(RpcServiceScan.class));
-        addExcludeFilter(new AnnotationTypeFilter(RpcServiceScan.class));
+        addIncludeFilter(new AnnotationTypeFilter(Reference.class));
+        addExcludeFilter(new AnnotationTypeFilter(Reference.class));
     }
 
     @Override

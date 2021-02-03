@@ -5,6 +5,6 @@ package com.siman.qrpc.enums;
  * @date 2021/1/31 15:56
  */
 
-public enum  RpcMessageTypeEnum {
+public enum RpcMessageType {
     HEART_BEAT
 }
