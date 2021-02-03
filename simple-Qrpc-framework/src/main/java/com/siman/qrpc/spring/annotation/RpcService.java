@@ -1,4 +1,4 @@
-package com.siman.qrpc.annotation;
+package com.siman.qrpc.spring.annotation;
 
 import org.springframework.stereotype.Component;
 

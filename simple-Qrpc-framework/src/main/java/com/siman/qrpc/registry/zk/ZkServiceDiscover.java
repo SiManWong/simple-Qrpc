@@ -5,6 +5,7 @@ import com.siman.qrpc.loadbalance.RandomLoadBalance;
 import com.siman.qrpc.registry.ServiceDiscover;
 import com.siman.qrpc.registry.zk.util.CuratorUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.curator.framework.CuratorFramework;
 
 import java.net.InetSocketAddress;
 import java.util.List;
@@ -17,13 +18,14 @@ import java.util.List;
 public class ZkServiceDiscover implements ServiceDiscover {
     private final LoadBalance loadBalance;
 
-     public ZkServiceDiscover() {
-         loadBalance = new RandomLoadBalance();
-     }
+    public ZkServiceDiscover() {
+        loadBalance = new RandomLoadBalance();
+    }
 
     @Override
     public InetSocketAddress lookupService(String serviceName) {
-        List<String> serviceAddresses = CuratorUtils.getChildrenNodes(serviceName);
+        CuratorFramework zkClient = CuratorUtils.getZkClient();
+        List<String> serviceAddresses = CuratorUtils.getChildrenNodes(zkClient, serviceName);
         // 负载均衡
         String serviceAddress = loadBalance.selectServiceAddress(serviceAddresses);
 

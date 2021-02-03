@@ -1,14 +1,8 @@
 package com.siman.qrpc.remoting.transport.netty.server;
 
-import com.siman.qrpc.annotation.RpcService;
 import com.siman.qrpc.config.CustomShutdownHook;
-import com.siman.qrpc.factory.SingletonFactory;
-import com.siman.qrpc.registry.ServiceRegistry;
-import com.siman.qrpc.registry.zk.ZkServiceRegistry;
 import com.siman.qrpc.remoting.model.RpcRequest;
 import com.siman.qrpc.remoting.model.RpcResponse;
-import com.siman.qrpc.provider.ServiceProvider;
-import com.siman.qrpc.provider.ServiceProviderImpl;
 import com.siman.qrpc.remoting.transport.netty.codec.RpcDecoder;
 import com.siman.qrpc.remoting.transport.netty.codec.RpcEncoder;
 import com.siman.qrpc.serialize.impl.KryoSerializer;
@@ -22,16 +16,10 @@ import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.timeout.IdleStateHandler;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
-import java.net.InetSocketAddress;
-import java.util.Map;
+import java.net.InetAddress;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -42,40 +30,14 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 @Component
-@PropertySource("classpath:rpc.properties")
-public class NettyRpcServer implements InitializingBean, ApplicationContextAware {
-    @Value("${rpc.server.host}")
-    private String host;
-    @Value("${rpc.server.port}")
-    private int port;
-    private final static ServiceRegistry serviceRegistry;
-    private final static ServiceProvider serviceProvider;
-
-    static {
-        serviceRegistry = SingletonFactory.getInstance(ZkServiceRegistry.class);
-        serviceProvider = SingletonFactory.getInstance(ServiceProviderImpl.class);
-    }
-
-    public void registerService(Object service) {
-        // 发布服务
-        serviceProvider.addService(service);
-        Class<?> anInterface = service.getClass().getInterfaces()[0];
-        serviceRegistry.registerService(anInterface.getCanonicalName(),new InetSocketAddress("127.0.0.1", port));
-    }
+public class NettyRpcServer implements InitializingBean {
+    public static final int PORT = 9998;
 
     @SneakyThrows
     public void start() {
-        // 服务器关闭后，注销所有服务
-//        CustomShutdownHook.getCustomShutdownHook().clearAll();
-
+        String host = InetAddress.getLocalHost().getHostAddress();
         EventLoopGroup bossGroup = new NioEventLoopGroup(1);
         EventLoopGroup workerGroup = new NioEventLoopGroup();
-        // 耗时任务线程组
-//        DefaultEventExecutorGroup serviceHandlerGroup = new DefaultEventExecutorGroup(
-//                // cpu 核数 * 2
-//                Runtime.getRuntime().availableProcessors() * 2,
-//                ThreadPoolFactoryUtils.createThreadFactory("service-handler-group", false)
-//        );
 
         try {
             ServerBootstrap bootstrap = new ServerBootstrap();
@@ -104,7 +66,7 @@ public class NettyRpcServer implements InitializingBean, ApplicationContextAware
                     // 表示系统用于临时存放已完成三次握手的请求的队列的最大长度,如果连接建立频繁，服务器处理创建新连接较慢，可以适当调大这个参数
                     .option(ChannelOption.SO_BACKLOG, 128);
             // 绑定端口
-            ChannelFuture future = bootstrap.bind(host, port).sync();
+            ChannelFuture future = bootstrap.bind(host, PORT).sync();
             // 等待服务端监听端口关闭
             future.channel().closeFuture().sync();
         } catch (InterruptedException e) {
@@ -122,13 +84,5 @@ public class NettyRpcServer implements InitializingBean, ApplicationContextAware
     @Override
     public void afterPropertiesSet() {
         CustomShutdownHook.getCustomShutdownHook().clearAll();
-    }
-
-    @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        System.out.println("set ApplicationContext");
-        // 获得所有被 RpcService 注解的类
-        Map<String, Object> registeredBeanMap = applicationContext.getBeansWithAnnotation(RpcService.class);
-        registeredBeanMap.values().forEach(o -> registerService(o));
     }
 }

@@ -1,6 +1,7 @@
-package com.siman.qrpc.spring.annotation;
+package com.siman.qrpc.spring.reference;
 
-import com.siman.qrpc.spring.rpcservice.RpcServiceScanner;
+import com.siman.qrpc.spring.annotation.Reference;
+import com.siman.qrpc.spring.reference.rpcservice.RpcServiceScanner;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
@@ -28,7 +29,7 @@ public class RpcServiceScannerRegister implements ImportBeanDefinitionRegistrar,
          * value：属性值
          */
         AnnotationAttributes annotationAttributes = AnnotationAttributes.fromMap(
-                importingClassMetadata.getAnnotationAttributes(RpcServiceScan.class.getName()));
+                importingClassMetadata.getAnnotationAttributes(Reference.class.getName()));
         RpcServiceScanner scanner = new RpcServiceScanner(registry);
         // 获取属性名为 value 的值
         String value = annotationAttributes.getString("value");

@@ -4,6 +4,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.ComponentScan;
 
 /**
+ * 通过注解注册服务
  * @author SiMan
  * @date 2021/1/23 0:02
  */
@@ -12,8 +13,6 @@ public class NettyServerBootStrap {
     public static void main(String[] args) {
         ApplicationContext applicationContext = new AnnotationConfigApplicationContext(NettyServerBootStrap.class);
         NettyRpcServer nettyRpcServer = applicationContext.getBean(NettyRpcServer.class);
-//        HelloService helloService = new HelloServiceImpl();
-//        NettyRpcServer nettyRpcServer = new NettyRpcServer();
         nettyRpcServer.start();
     }
 }

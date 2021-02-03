@@ -1,11 +1,16 @@
 package com.siman.qrpc.provider;
 
 import com.siman.qrpc.entity.RpcServiceProperties;
-import com.siman.qrpc.enums.RpcErrorMessageEnum;
+import com.siman.qrpc.enums.RpcErrorMessage;
 import com.siman.qrpc.exception.RpcException;
+import com.siman.qrpc.factory.SingletonFactory;
+import com.siman.qrpc.registry.ServiceRegistry;
+import com.siman.qrpc.registry.zk.ZkServiceRegistry;
+import com.siman.qrpc.remoting.transport.netty.server.NettyRpcServer;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.Map;
 import java.util.Set;
@@ -30,21 +35,23 @@ public class ServiceProviderImpl implements ServiceProvider{
      * 已注册的服务
      */
     private final Set<String> registeredService;
+    private final ServiceRegistry serviceRegistry;
 
     public ServiceProviderImpl() {
         serviceMap = new ConcurrentHashMap<>();
         registeredService = ConcurrentHashMap.newKeySet();
+        serviceRegistry = SingletonFactory.getInstance(ZkServiceRegistry.class);
     }
 
     @Override
     public void addService(Object service) {
         Class<?> serviceClass = service.getClass().getInterfaces()[0];
-        addService(service, serviceClass);
+        this.addService(service, serviceClass, RpcServiceProperties.builder().group("").version("").build());
     }
 
     @Override
-    public void addService(Object service, Class<?> serviceClass) {
-        String rpcServiceName = serviceClass.getCanonicalName();
+    public void addService(Object service, Class<?> serviceClass, RpcServiceProperties rpcServiceProperties) {
+        String rpcServiceName = rpcServiceProperties.toRpcServiceName();
         if (registeredService.contains(rpcServiceName)) {
             return;
         }
@@ -57,29 +64,30 @@ public class ServiceProviderImpl implements ServiceProvider{
     public Object getService(RpcServiceProperties rpcServiceProperties) {
         Object service = serviceMap.get(rpcServiceProperties.toRpcServiceName());
         if (null == service) {
-            throw new RpcException(RpcErrorMessageEnum.SERVICE_CAN_NOT_BE_FOUND);
+            throw new RpcException(RpcErrorMessage.SERVICE_CAN_NOT_BE_FOUND);
         }
         return service;
     }
 
-//    @Override
-//    public void publishService(Object service) {
-//        this.publishService(service, RpcServiceProperties.builder().build());
-//    }
-//
-//    @Override
-//    public void publishService(Object service, RpcServiceProperties rpcServiceProperties) {
-//        try {
-//            String realHost = InetAddress.getLocalHost().getHostAddress();
-//            String host = "127.0.0.1";
-//            Class<?> serviceRelatedInterface = service.getClass().getInterfaces()[0];
-//            String serviceName = serviceRelatedInterface.getCanonicalName();
-//            rpcServiceProperties.setServiceName(serviceName);
-//            this.addService(service, serviceRelatedInterface, rpcServiceProperties);
-//            //TODO 注册中心注册服务
-////            serviceRegistry.registerService(rpcServiceProperties.toRpcServiceName(), new InetSocketAddress(host, NettyRpcServer.PORT));
-//        } catch (UnknownHostException e) {
-//            log.error("occur exception when getHostAddress", e);
-//        }
-//    }
+    @Override
+    public void publishService(Object service) {
+        this.publishService(service, RpcServiceProperties.builder().group("").version("").build());
+    }
+
+    @Override
+    public void publishService(Object service, RpcServiceProperties rpcServiceProperties) {
+        try {
+            String host = InetAddress.getLocalHost().getHostAddress();
+            Class<?> anInterface = service.getClass().getInterfaces()[0];
+            String serviceName = anInterface.getCanonicalName();
+            rpcServiceProperties.setServiceName(serviceName);
+            this.addService(service, anInterface, rpcServiceProperties);
+            serviceRegistry.registerService(serviceName, new InetSocketAddress(host, NettyRpcServer.PORT));
+        } catch (UnknownHostException e) {
+            log.error("occur exception when getHostAddress", e);
+        }
+
+    }
+
+
 }

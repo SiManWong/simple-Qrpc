@@ -1,4 +1,4 @@
-package com.siman.qrpc.spring.rpcservice;
+package com.siman.qrpc.spring.reference.rpcservice;
 
 import com.siman.qrpc.spring.ClientProxy;
 import org.springframework.beans.factory.FactoryBean;

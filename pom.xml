@@ -14,7 +14,6 @@
         <module>example-server</module>
         <module>example-client</module>
         <module>public-interface-api</module>
-        <module>simple-Qrpc-spring</module>
     </modules>
 
     <properties>

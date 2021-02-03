@@ -7,13 +7,15 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="simple-Qrpc-common" />
-        <module name="public-interface-api" />
         <module name="example-server" />
-        <module name="example-client" />
-        <module name="simple-Qrpc-spring" />
+        <module name="public-interface-api" />
+        <module name="simple-Qrpc-common" />
         <module name="simple-Qrpc-framework" />
+        <module name="example-client" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="simple-Qrpc-spring" target="1.8" />
+    </bytecodeTargetLevel>
   </component>
 </project>

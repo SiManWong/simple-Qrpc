@@ -1,6 +1,6 @@
 package com.siman.qrpc.remoting.transport.netty.client;
 
-import com.siman.qrpc.enums.RpcMessageTypeEnum;
+import com.siman.qrpc.enums.RpcMessageType;
 import com.siman.qrpc.factory.SingletonFactory;
 import com.siman.qrpc.remoting.model.RpcRequest;
 import com.siman.qrpc.remoting.model.RpcResponse;
@@ -50,7 +50,7 @@ public class NettyRpcClientHandler extends ChannelInboundHandlerAdapter {
             if (state == IdleState.WRITER_IDLE) {
                 log.info("write idle happen [{}]", ctx.channel().remoteAddress());
                 Channel channel = ChannelProvider.get((InetSocketAddress) ctx.channel().remoteAddress());
-                RpcRequest rpcRequest = RpcRequest.builder().rpcMessageTypeEnum(RpcMessageTypeEnum.HEART_BEAT).build();
+                RpcRequest rpcRequest = RpcRequest.builder().rpcMessageType(RpcMessageType.HEART_BEAT).build();
                 channel.writeAndFlush(rpcRequest).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
             } else {
                 super.userEventTriggered(ctx, evt);

@@ -1,6 +1,6 @@
 package com.siman.qrpc.spring.annotation;
 
-import com.siman.qrpc.spring.annotation.RpcServiceScannerRegister;
+import com.siman.qrpc.spring.reference.RpcServiceScannerRegister;
 import org.springframework.context.annotation.Import;
 
 import java.lang.annotation.*;
@@ -17,6 +17,6 @@ import java.lang.annotation.*;
 @Target(ElementType.TYPE)
 @Documented
 @Import(RpcServiceScannerRegister.class)
-public @interface RpcServiceScan {
+public @interface Reference {
     String value();
 }
