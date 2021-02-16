@@ -7,7 +7,7 @@ import lombok.ToString;
  * @date 2020/12/25 18:13
  */
 @ToString
-public enum RpcResponseCode {
+public enum RpcResponseCodeEnum {
 
     // 成功
     SUCCESS(200, "调用方法成功"),
@@ -18,7 +18,7 @@ public enum RpcResponseCode {
 
     private final String message;
 
-    RpcResponseCode(int code, String message) {
+    RpcResponseCodeEnum(int code, String message) {
         this.code = code;
         this.message = message;
     }

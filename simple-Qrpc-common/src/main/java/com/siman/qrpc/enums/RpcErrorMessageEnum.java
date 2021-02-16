@@ -5,8 +5,7 @@ package com.siman.qrpc.enums;
  * @date 2020/12/25 1:38
  */
 
-public enum RpcErrorMessage {
-    //
+public enum RpcErrorMessageEnum {
     CLIENT_CONNECT_SERVER_FAILURE("客户端连接服务端失败"),
     SERVICE_INVOCATION_FAILURE("服务调用失败"),
     SERVICE_CAN_NOT_BE_FOUND("没有找到指定的服务"),
@@ -15,7 +14,7 @@ public enum RpcErrorMessage {
 
     private final String message;
 
-    RpcErrorMessage(String message) {
+    RpcErrorMessageEnum(String message) {
         this.message = message;
     }
 
