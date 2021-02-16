@@ -29,19 +29,22 @@ public class RpcClientProxy implements InvocationHandler {
      * 用于发送请求给服务端，对应socket和netty两种实现方式
      */
     private final RpcRequestTransport rpcRequestTransport;
+    private final RpcServiceProperties serviceProperties;
 
     public RpcClientProxy(RpcRequestTransport rpcRequestTransport, RpcServiceProperties rpcServiceProperties) {
         this.rpcRequestTransport = rpcRequestTransport;
-//        if (rpcServiceProperties.getGroup() == null) {
-//            rpcServiceProperties.setGroup("");
-//        }
-//        if (rpcServiceProperties.getVersion() == null) {
-//            rpcServiceProperties.setVersion("");
-//        }
+        if (rpcServiceProperties.getGroup() == null) {
+            rpcServiceProperties.setGroup("");
+        }
+        if (rpcServiceProperties.getVersion() == null) {
+            rpcServiceProperties.setVersion("");
+        }
+        this.serviceProperties = rpcServiceProperties;
     }
 
     public RpcClientProxy(RpcRequestTransport rpcRequestTransport) {
         this.rpcRequestTransport = rpcRequestTransport;
+        this.serviceProperties = RpcServiceProperties.builder().build();
     }
 
     /**
@@ -64,7 +67,10 @@ public class RpcClientProxy implements InvocationHandler {
                 .parameters(args)
                 .interfaceName(method.getDeclaringClass().getName())
                 .paramTypes(method.getParameterTypes())
-                .requestId(UUID.randomUUID().toString()).build();
+                .requestId(UUID.randomUUID().toString())
+                .group(serviceProperties.getGroup())
+                .version(serviceProperties.getVersion())
+                .build();
         RpcResponse<Object> rpcResponse = null;
         // 基于 Socket 实现
         if (rpcRequestTransport instanceof SocketRpcClient) {

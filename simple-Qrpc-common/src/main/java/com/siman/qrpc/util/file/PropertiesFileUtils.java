@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.URL;
 import java.net.URLDecoder;
 import java.util.Properties;
 
@@ -17,16 +18,18 @@ public final class PropertiesFileUtils {
     private PropertiesFileUtils() {}
 
     public static Properties readPropertiesFile(String fileName){
-        Properties properties = null;
-        String rootPath = Thread.currentThread().getContextClassLoader().getResource("").getPath();
-
-        try {
-            rootPath = URLDecoder.decode(rootPath,"utf-8");
-        } catch (UnsupportedEncodingException e) {
-            log.error("occur exception when decode properties path [{}]", rootPath);
+        String rpcConfigPath = "";
+        String rootPath = "";
+        URL url = Thread.currentThread().getContextClassLoader().getResource("");
+        if (url != null) {
+            try {
+                rootPath = URLDecoder.decode(url.getPath(),"utf-8");
+            } catch (UnsupportedEncodingException e) {
+                log.error("occur exception when decode properties path [{}]", rootPath);
+            }
+            rpcConfigPath = rootPath + fileName;
         }
-
-        String rpcConfigPath = rootPath + fileName;
+        Properties properties = null;
         try (FileInputStream fileInputStream = new FileInputStream(rpcConfigPath)){
             properties = new Properties();
             properties.load(fileInputStream);

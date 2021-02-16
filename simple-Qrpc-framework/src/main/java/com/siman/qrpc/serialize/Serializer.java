@@ -1,10 +1,12 @@
 package com.siman.qrpc.serialize;
 
+import com.siman.qrpc.extension.SPI;
+
 /**
  * @author SiMan
  * @date 2021/1/21 0:33
  */
-
+@SPI
 public interface Serializer {
 
     /**

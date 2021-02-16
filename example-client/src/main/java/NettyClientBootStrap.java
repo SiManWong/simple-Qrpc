@@ -1,3 +1,4 @@
+import com.siman.qrpc.entity.RpcServiceProperties;
 import com.siman.qrpc.pojo.Hello;
 import com.siman.qrpc.proxy.RpcClientProxy;
 import com.siman.qrpc.remoting.transport.RpcRequestTransport;
@@ -12,7 +13,9 @@ import com.siman.qrpc.service.HelloService;
 public class NettyClientBootStrap {
     public static void main(String[] args) throws InterruptedException {
         RpcRequestTransport rpcRequestTransport = new NettyRpcClient();
-        RpcClientProxy rpcClientProxy = new RpcClientProxy(rpcRequestTransport);
+        RpcServiceProperties rpcServiceProperties = RpcServiceProperties.builder()
+                .group("test1").version("1.0").build();
+        RpcClientProxy rpcClientProxy = new RpcClientProxy(rpcRequestTransport, rpcServiceProperties);
         HelloService helloService = rpcClientProxy.getProxy(HelloService.class);
 //        String des = helloService.hello(new Hello("111", "~~~"));
 //        System.out.println(des);

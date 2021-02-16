@@ -1,6 +1,6 @@
 package com.siman.qrpc.registry.zk.util;
 
-import com.siman.qrpc.enums.RpcProperties;
+import com.siman.qrpc.enums.RpcConfigProperties;
 import com.siman.qrpc.exception.RpcException;
 import com.siman.qrpc.util.file.PropertiesFileUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -13,13 +13,13 @@ import org.apache.curator.framework.recipes.cache.PathChildrenCacheListener;
 import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.apache.zookeeper.CreateMode;
 
-import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
+ * zookeeper 客户端 Curator 工具类
  * @author SiMan
  * @date 2021/1/29 0:58
  */
@@ -46,23 +46,22 @@ public final class CuratorUtils {
     public static CuratorFramework getZkClient() {
         // 通过配置文件获取 zookeeper 地址
         Properties properties = null;
-        properties = PropertiesFileUtils.readPropertiesFile(RpcProperties.RPC_CONFIG_PATH.getPropertyValue());
+        properties = PropertiesFileUtils.readPropertiesFile(RpcConfigProperties.RPC_CONFIG_PATH.getPropertyValue());
         if (properties != null) {
-            defaultZookeeperAddress = properties.getProperty(RpcProperties.ZK_ADDRESS.getPropertyValue());
+            defaultZookeeperAddress = properties.getProperty(RpcConfigProperties.ZK_ADDRESS.getPropertyValue());
         }
         if (zkClient != null && zkClient.getState() == CuratorFrameworkState.STARTED) {
             return zkClient;
         }
         // 重试策略。重试3次，并且会增加重试之间的睡眠时间。
         RetryPolicy retryPolicy = new ExponentialBackoffRetry(BASE_SLEEP_TIME, MAX_RETRIES);
-        CuratorFramework curatorFramework = CuratorFrameworkFactory.builder()
+        zkClient = CuratorFrameworkFactory.builder()
                 //要连接的服务器(可以是服务器列表)
                 .connectString(defaultZookeeperAddress)
                 .retryPolicy(retryPolicy)
-                .authorization("digest", "user1:123456".getBytes())
                 .build();
-        curatorFramework.start();
-        return curatorFramework;
+        zkClient.start();
+        return zkClient;
     }
 
     /**
