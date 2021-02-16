@@ -1,11 +1,10 @@
 package com.siman.qrpc.provider;
 
 import com.siman.qrpc.entity.RpcServiceProperties;
-import com.siman.qrpc.enums.RpcErrorMessage;
+import com.siman.qrpc.enums.RpcErrorMessageEnum;
 import com.siman.qrpc.exception.RpcException;
-import com.siman.qrpc.factory.SingletonFactory;
+import com.siman.qrpc.extension.ExtensionLoader;
 import com.siman.qrpc.registry.ServiceRegistry;
-import com.siman.qrpc.registry.zk.ZkServiceRegistry;
 import com.siman.qrpc.remoting.transport.netty.server.NettyRpcServer;
 import lombok.extern.slf4j.Slf4j;
 
@@ -40,7 +39,7 @@ public class ServiceProviderImpl implements ServiceProvider{
     public ServiceProviderImpl() {
         serviceMap = new ConcurrentHashMap<>();
         registeredService = ConcurrentHashMap.newKeySet();
-        serviceRegistry = SingletonFactory.getInstance(ZkServiceRegistry.class);
+        serviceRegistry = ExtensionLoader.getExtensionLoader(ServiceRegistry.class).getExtension("zk");
     }
 
     @Override
@@ -64,7 +63,7 @@ public class ServiceProviderImpl implements ServiceProvider{
     public Object getService(RpcServiceProperties rpcServiceProperties) {
         Object service = serviceMap.get(rpcServiceProperties.toRpcServiceName());
         if (null == service) {
-            throw new RpcException(RpcErrorMessage.SERVICE_CAN_NOT_BE_FOUND);
+            throw new RpcException(RpcErrorMessageEnum.SERVICE_CAN_NOT_BE_FOUND);
         }
         return service;
     }

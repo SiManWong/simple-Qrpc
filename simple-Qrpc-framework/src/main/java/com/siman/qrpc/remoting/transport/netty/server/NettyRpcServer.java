@@ -1,10 +1,12 @@
 package com.siman.qrpc.remoting.transport.netty.server;
 
 import com.siman.qrpc.config.CustomShutdownHook;
+import com.siman.qrpc.extension.ExtensionLoader;
 import com.siman.qrpc.remoting.model.RpcRequest;
 import com.siman.qrpc.remoting.model.RpcResponse;
 import com.siman.qrpc.remoting.transport.netty.codec.RpcDecoder;
 import com.siman.qrpc.remoting.transport.netty.codec.RpcEncoder;
+import com.siman.qrpc.serialize.Serializer;
 import com.siman.qrpc.serialize.impl.KryoSerializer;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
@@ -41,7 +43,7 @@ public class NettyRpcServer implements InitializingBean {
 
         try {
             ServerBootstrap bootstrap = new ServerBootstrap();
-            KryoSerializer kryoSerializer = new KryoSerializer();
+            Serializer kryoSerializer = ExtensionLoader.getExtensionLoader(Serializer.class).getExtension("kryo");
             bootstrap.group(bossGroup, workerGroup)
                     .channel(NioServerSocketChannel.class)
                     .handler(new LoggingHandler(LogLevel.INFO))

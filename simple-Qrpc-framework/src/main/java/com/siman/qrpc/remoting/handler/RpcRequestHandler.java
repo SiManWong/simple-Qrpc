@@ -33,7 +33,7 @@ public class RpcRequestHandler {
     }
 
     /**
-     * 调用目标方法
+     * 根据 rpcRequest 和 service 对象调用特定的方法并返回结果
      *
      * @param rpcRequest 客户端请求
      * @param service    服务端

@@ -1,5 +1,6 @@
 package com.siman.qrpc.remoting.transport.netty.client;
 
+import com.siman.qrpc.extension.ExtensionLoader;
 import com.siman.qrpc.factory.SingletonFactory;
 import com.siman.qrpc.registry.ServiceDiscover;
 import com.siman.qrpc.registry.zk.ZkServiceDiscover;
@@ -9,6 +10,7 @@ import com.siman.qrpc.remoting.model.RpcMessageChecker;
 import com.siman.qrpc.remoting.transport.RpcRequestTransport;
 import com.siman.qrpc.remoting.transport.netty.codec.RpcDecoder;
 import com.siman.qrpc.remoting.transport.netty.codec.RpcEncoder;
+import com.siman.qrpc.serialize.Serializer;
 import com.siman.qrpc.serialize.impl.KryoSerializer;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
@@ -43,7 +45,7 @@ public final class NettyRpcClient implements RpcRequestTransport {
     public NettyRpcClient() {
         eventLoopGroup = new NioEventLoopGroup();
         bootstrap = new Bootstrap();
-        KryoSerializer kryoSerializer = new KryoSerializer();
+        Serializer kryoSerializer = ExtensionLoader.getExtensionLoader(Serializer.class).getExtension("kryo");
         // bootstrap 引导 Netty 配置
         bootstrap.group(eventLoopGroup)
                 .channel(NioSocketChannel.class)
@@ -65,7 +67,7 @@ public final class NettyRpcClient implements RpcRequestTransport {
                 });
 
         unprocessedRequests = SingletonFactory.getInstance(UnprocessedRequests.class);
-        serviceDiscover = SingletonFactory.getInstance(ZkServiceDiscover.class);
+        serviceDiscover = ExtensionLoader.getExtensionLoader(ServiceDiscover.class).getExtension("zk");
     }
 
     @SneakyThrows
@@ -92,8 +94,10 @@ public final class NettyRpcClient implements RpcRequestTransport {
     public CompletableFuture<RpcResponse> sendRpcRequest(RpcRequest rpcRequest) {
         // 构建返回值
         CompletableFuture<RpcResponse> resultFuture = new CompletableFuture<>();
+        // build rpc service name by ppcRequest
+        String serviceName = rpcRequest.toRpcProperties().getServiceName();
         // 从注册中心获取服务地址
-        InetSocketAddress inetSocketAddress = serviceDiscover.lookupService(rpcRequest.getInterfaceName());
+        InetSocketAddress inetSocketAddress = serviceDiscover.lookupService(serviceName);
         Channel channel = ChannelProvider.get(inetSocketAddress);
         if (channel != null && channel.isActive()) {
             // 放入未处理的请求
