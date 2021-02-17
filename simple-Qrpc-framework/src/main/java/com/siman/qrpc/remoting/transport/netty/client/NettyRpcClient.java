@@ -41,6 +41,7 @@ public final class NettyRpcClient implements RpcRequestTransport {
     private final EventLoopGroup eventLoopGroup;
     private final ServiceDiscover serviceDiscover;
     private final UnprocessedRequests unprocessedRequests;
+    private final ChannelProvider channelProvider;
 
     public NettyRpcClient() {
         eventLoopGroup = new NioEventLoopGroup();
@@ -67,6 +68,7 @@ public final class NettyRpcClient implements RpcRequestTransport {
                 });
 
         unprocessedRequests = SingletonFactory.getInstance(UnprocessedRequests.class);
+        channelProvider = SingletonFactory.getInstance(ChannelProvider.class);
         serviceDiscover = ExtensionLoader.getExtensionLoader(ServiceDiscover.class).getExtension("zk");
     }
 
@@ -98,7 +100,7 @@ public final class NettyRpcClient implements RpcRequestTransport {
         String serviceName = rpcRequest.toRpcProperties().getServiceName();
         // 从注册中心获取服务地址
         InetSocketAddress inetSocketAddress = serviceDiscover.lookupService(serviceName);
-        Channel channel = ChannelProvider.get(inetSocketAddress);
+        Channel channel = getChannel(inetSocketAddress);
         if (channel != null && channel.isActive()) {
             // 放入未处理的请求
             unprocessedRequests.put(rpcRequest.getRequestId(), resultFuture);
@@ -116,5 +118,14 @@ public final class NettyRpcClient implements RpcRequestTransport {
         }
 
         return resultFuture;
+    }
+
+    public Channel getChannel(InetSocketAddress inetSocketAddress) {
+        Channel channel = channelProvider.get(inetSocketAddress);
+        if (channel == null) {
+            channel = doConnect(inetSocketAddress);
+            channelProvider.set(inetSocketAddress, channel);
+        }
+        return channel;
     }
 }
