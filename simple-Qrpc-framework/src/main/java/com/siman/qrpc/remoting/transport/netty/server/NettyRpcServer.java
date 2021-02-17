@@ -32,7 +32,7 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 @Component
-public class NettyRpcServer implements InitializingBean {
+public class NettyRpcServer{
     public static final int PORT = 9998;
 
     @SneakyThrows
@@ -78,13 +78,5 @@ public class NettyRpcServer implements InitializingBean {
             bossGroup.shutdownGracefully();
             workerGroup.shutdownGracefully();
         }
-    }
-
-    /**
-     * 设置所有 bean 属性后调用
-     */
-    @Override
-    public void afterPropertiesSet() {
-        CustomShutdownHook.getCustomShutdownHook().clearAll();
     }
 }
