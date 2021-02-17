@@ -15,6 +15,5 @@ public class NettyClientBootStrap2 {
         HelloService helloService = applicationContext.getBean(HelloService.class);
         Hello hello = Hello.builder().message("消息").description("描述").build();
         helloService.hello(hello);
-
     }
 }

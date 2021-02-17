@@ -17,17 +17,13 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class ChannelProvider {
 
-    private static final Map<String, Channel> channelMap;
-    private static final NettyRpcClient nettyRpcClient;
+    private final Map<String, Channel> channelMap;
 
-    static {
+    public ChannelProvider() {
         channelMap = new ConcurrentHashMap<>();
-        nettyRpcClient = SingletonFactory.getInstance(NettyRpcClient.class);
     }
 
-    private ChannelProvider() {}
-
-    public static Channel get(InetSocketAddress inetSocketAddress) {
+    public Channel get(InetSocketAddress inetSocketAddress) {
         String key = inetSocketAddress.toString();
         // 判断是否有对应地址的连接
         if (channelMap.containsKey(key)) {
@@ -39,11 +35,13 @@ public class ChannelProvider {
                 channelMap.remove(key);
             }
         }
-        // 否则，重新连接获取 Channel
-        Channel channel = nettyRpcClient.doConnect(inetSocketAddress);
-        channelMap.put(key, channel);
 
-        return channel;
+        return null;
+    }
+
+    public void set(InetSocketAddress inetSocketAddress, Channel channel) {
+        String key = inetSocketAddress.toString();
+        channelMap.put(key, channel);
     }
 
 
