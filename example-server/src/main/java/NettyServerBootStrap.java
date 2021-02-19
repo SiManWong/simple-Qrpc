@@ -1,3 +1,4 @@
+import com.siman.qrpc.remoting.transport.netty.server.NettyRpcServer;
 import com.siman.qrpc.spring.annotation.RpcScan;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
@@ -10,7 +11,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 public class NettyServerBootStrap {
     public static void main(String[] args) {
         new AnnotationConfigApplicationContext(NettyServerBootStrap.class);
-//        NettyRpcServer nettyRpcServer = new NettyRpcServer();
-//        nettyRpcServer.start();
+        NettyRpcServer nettyRpcServer = new NettyRpcServer();
+        nettyRpcServer.start();
     }
 }

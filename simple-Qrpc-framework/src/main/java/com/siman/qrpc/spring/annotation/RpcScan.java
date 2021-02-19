@@ -1,7 +1,7 @@
 package com.siman.qrpc.spring.annotation;
 
 
-import com.siman.qrpc.spring.scanner.CustomScannerRegistrar;
+import com.siman.qrpc.spring.CustomScannerRegistrar;
 import org.springframework.context.annotation.Import;
 
 import java.lang.annotation.*;

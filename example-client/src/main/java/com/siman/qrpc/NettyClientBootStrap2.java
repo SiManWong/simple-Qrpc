@@ -1,6 +1,7 @@
-import com.siman.qrpc.pojo.Hello;
-import com.siman.qrpc.service.HelloService;
+package com.siman.qrpc;
+
 import com.siman.qrpc.spring.annotation.Reference;
+import com.siman.qrpc.spring.annotation.RpcScan;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 /**
@@ -8,12 +9,11 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
  * @date 2021/2/2 1:40
  */
 
-@Reference("com.siman.qrpc.service")
+@RpcScan(basePackage = {"com.siman.qrpc"})
 public class NettyClientBootStrap2 {
     public static void main(String[] args) {
         AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext(NettyClientBootStrap2.class);
-        HelloService helloService = applicationContext.getBean(HelloService.class);
-        Hello hello = Hello.builder().message("消息").description("描述").build();
-        helloService.hello(hello);
+        HelloController helloController = (HelloController) applicationContext.getBean("helloController");
+        helloController.test();
     }
 }

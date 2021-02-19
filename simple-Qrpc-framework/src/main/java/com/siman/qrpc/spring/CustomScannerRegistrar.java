@@ -1,4 +1,4 @@
-package com.siman.qrpc.spring.scanner;
+package com.siman.qrpc.spring;
 
 import com.siman.qrpc.spring.annotation.RpcScan;
 import com.siman.qrpc.spring.annotation.RpcService;
@@ -13,7 +13,7 @@ import org.springframework.core.type.StandardAnnotationMetadata;
 import org.springframework.stereotype.Component;
 
 /**
- * 扫描和过滤指定的注解
+ * 扫描自定义注解标识的bean然后放入Spring容器中
  * @author SiMan
  * @date 2021/2/16 17:59
  */
@@ -50,7 +50,7 @@ public class CustomScannerRegistrar implements ImportBeanDefinitionRegistrar, Re
         }
         int springBeanAmount = springBeanScanner.scan(SPRING_BEAN_BASE_PACKAGE);
         log.info("springBeanScanner扫描的数量 [{}]", springBeanAmount);
-        int scanAmount = rpcServiceScanner.scan(rpcScanBasePackages);
-        log.info("rpcServiceScanner扫描的数量 [{}]", scanAmount);
+        int rpcServiceAmount = rpcServiceScanner.scan(rpcScanBasePackages);
+        log.info("rpcServiceScanner扫描的数量 [{}]", rpcServiceAmount);
     }
 }

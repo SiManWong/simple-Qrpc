@@ -1,4 +1,4 @@
-package com.siman.qrpc.spring.scanner;
+package com.siman.qrpc.spring;
 
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.context.annotation.ClassPathBeanDefinitionScanner;
