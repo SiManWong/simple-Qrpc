@@ -1,17 +1,16 @@
 package com.siman.qrpc.remoting.transport.netty.client;
 
+import com.siman.qrpc.enums.SerializationTypeEnum;
 import com.siman.qrpc.extension.ExtensionLoader;
 import com.siman.qrpc.factory.SingletonFactory;
 import com.siman.qrpc.registry.ServiceDiscover;
-import com.siman.qrpc.registry.zk.ZkServiceDiscover;
+import com.siman.qrpc.remoting.constans.RpcConstants;
+import com.siman.qrpc.remoting.model.RpcMessage;
 import com.siman.qrpc.remoting.model.RpcRequest;
 import com.siman.qrpc.remoting.model.RpcResponse;
-import com.siman.qrpc.remoting.model.RpcMessageChecker;
 import com.siman.qrpc.remoting.transport.RpcRequestTransport;
-import com.siman.qrpc.remoting.transport.netty.codec.RpcDecoder;
-import com.siman.qrpc.remoting.transport.netty.codec.RpcEncoder;
-import com.siman.qrpc.serialize.Serializer;
-import com.siman.qrpc.serialize.impl.KryoSerializer;
+import com.siman.qrpc.remoting.transport.netty.codec.RpcMessageDecoder;
+import com.siman.qrpc.remoting.transport.netty.codec.RpcMessageEncoder;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -20,7 +19,6 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.timeout.IdleStateHandler;
-import io.netty.util.AttributeKey;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
@@ -46,7 +44,6 @@ public final class NettyRpcClient implements RpcRequestTransport {
     public NettyRpcClient() {
         eventLoopGroup = new NioEventLoopGroup();
         bootstrap = new Bootstrap();
-        Serializer kryoSerializer = ExtensionLoader.getExtensionLoader(Serializer.class).getExtension("kryo");
         // bootstrap 引导 Netty 配置
         bootstrap.group(eventLoopGroup)
                 .channel(NioSocketChannel.class)
@@ -60,9 +57,9 @@ public final class NettyRpcClient implements RpcRequestTransport {
                         // 5 秒内没有发送数据给服务端的话，就发送一次心跳请求
                         pipeline.addLast(new IdleStateHandler(0,5,0, TimeUnit.SECONDS));
                         // 解码器
-                        pipeline.addLast("decode", new RpcDecoder(kryoSerializer, RpcResponse.class));
+                        pipeline.addLast("decode", new RpcMessageDecoder());
                         // 编码器
-                        pipeline.addLast("encode", new RpcEncoder(kryoSerializer, RpcRequest.class));
+                        pipeline.addLast("encode", new RpcMessageEncoder());
                         pipeline.addLast(new NettyRpcClientHandler());
                     }
                 });
@@ -104,9 +101,13 @@ public final class NettyRpcClient implements RpcRequestTransport {
         if (channel != null && channel.isActive()) {
             // 放入未处理的请求
             unprocessedRequests.put(rpcRequest.getRequestId(), resultFuture);
-            channel.writeAndFlush(rpcRequest).addListener((ChannelFutureListener) future -> {
+            RpcMessage rpcMessage = new RpcMessage();
+            rpcMessage.setMessageType(RpcConstants.REQUEST_TYPE);
+            rpcMessage.setCodec(SerializationTypeEnum.KRYO.getCode());
+            rpcMessage.setData(rpcRequest);
+            channel.writeAndFlush(rpcMessage).addListener((ChannelFutureListener) future -> {
                 if (future.isSuccess()) {
-                    log.info("client send message: [{}]", rpcRequest);
+                    log.info("client send message: [{}]", rpcMessage);
                 } else {
                     future.channel().close();
                     resultFuture.completeExceptionally(future.cause());

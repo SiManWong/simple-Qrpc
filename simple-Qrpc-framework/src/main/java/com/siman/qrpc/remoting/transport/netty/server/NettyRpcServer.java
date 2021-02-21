@@ -1,13 +1,11 @@
 package com.siman.qrpc.remoting.transport.netty.server;
 
-import com.siman.qrpc.config.CustomShutdownHook;
 import com.siman.qrpc.extension.ExtensionLoader;
 import com.siman.qrpc.remoting.model.RpcRequest;
 import com.siman.qrpc.remoting.model.RpcResponse;
-import com.siman.qrpc.remoting.transport.netty.codec.RpcDecoder;
-import com.siman.qrpc.remoting.transport.netty.codec.RpcEncoder;
+import com.siman.qrpc.remoting.transport.netty.codec.RpcMessageDecoder;
+import com.siman.qrpc.remoting.transport.netty.codec.RpcMessageEncoder;
 import com.siman.qrpc.serialize.Serializer;
-import com.siman.qrpc.serialize.impl.KryoSerializer;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -18,7 +16,6 @@ import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.timeout.IdleStateHandler;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Component;
 
 import java.net.InetAddress;
@@ -43,7 +40,6 @@ public class NettyRpcServer{
 
         try {
             ServerBootstrap bootstrap = new ServerBootstrap();
-            Serializer kryoSerializer = ExtensionLoader.getExtensionLoader(Serializer.class).getExtension("kryo");
             bootstrap.group(bossGroup, workerGroup)
                     .channel(NioServerSocketChannel.class)
                     .handler(new LoggingHandler(LogLevel.INFO))
@@ -54,9 +50,9 @@ public class NettyRpcServer{
                             // 30 秒之内没有收到客户端的请求就关闭连接
                             pipeline.addLast(new IdleStateHandler(30,0,0, TimeUnit.SECONDS));
                             // 解码器
-                            pipeline.addLast("decode", new RpcDecoder(kryoSerializer, RpcRequest.class));
+                            pipeline.addLast("decode", new RpcMessageDecoder());
                             // 编码器
-                            pipeline.addLast("encode", new RpcEncoder(kryoSerializer, RpcResponse.class));
+                            pipeline.addLast("encode", new RpcMessageEncoder());
                             // 请求处理器
                             pipeline.addLast(new NettyRpcServerHandler());
                         }

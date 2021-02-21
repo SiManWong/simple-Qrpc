@@ -25,10 +25,4 @@ public interface Serializer {
      * @return 反序列化的对象
      */
     <T> T deserialize(byte[] bytes, Class<T> clazz);
-
-    /**
-     * 序列化算法
-     * @return
-     */
-    byte getSerializerAlgorithm();
 }

@@ -1,8 +1,9 @@
 package com.siman.qrpc.remoting.transport.netty.client;
 
-import com.siman.qrpc.enums.RpcMessageType;
+import com.siman.qrpc.enums.SerializationTypeEnum;
 import com.siman.qrpc.factory.SingletonFactory;
-import com.siman.qrpc.remoting.model.RpcRequest;
+import com.siman.qrpc.remoting.constans.RpcConstants;
+import com.siman.qrpc.remoting.model.RpcMessage;
 import com.siman.qrpc.remoting.model.RpcResponse;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFutureListener;
@@ -24,7 +25,6 @@ import java.net.InetSocketAddress;
 public class NettyRpcClientHandler extends ChannelInboundHandlerAdapter {
     private final UnprocessedRequests unprocessedRequests;
     private final ChannelProvider channelProvider;
-//    private final NettyRpcClient nettyRpcClient;
 
     public NettyRpcClientHandler() {
         this.unprocessedRequests = SingletonFactory.getInstance(UnprocessedRequests.class);
@@ -37,9 +37,17 @@ public class NettyRpcClientHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
         try {
-            RpcResponse rpcResponse = (RpcResponse) msg;
-            log.info("client receive msg: [{}]", rpcResponse.toString());
-            unprocessedRequests.complete(rpcResponse);
+            log.info("client receive msg: [{}]", msg);
+            if (msg instanceof RpcMessage) {
+                RpcMessage tmp = (RpcMessage) msg;
+                byte messageType = tmp.getMessageType();
+                if (messageType == RpcConstants.HEARTBEAT_RESPONSE_TYPE) {
+                    log.info("heart [{}]", tmp.getData());
+                } else if (messageType == RpcConstants.RESPONSE_TYPE) {
+                    RpcResponse<Object> response = (RpcResponse<Object>) tmp.getData();
+                    unprocessedRequests.complete(response);
+                }
+            }
         } finally {
             ReferenceCountUtil.release(msg);
         }
@@ -52,8 +60,11 @@ public class NettyRpcClientHandler extends ChannelInboundHandlerAdapter {
             if (state == IdleState.WRITER_IDLE) {
                 log.info("write idle happen [{}]", ctx.channel().remoteAddress());
                 Channel channel = channelProvider.get((InetSocketAddress) ctx.channel().remoteAddress());
-                RpcRequest rpcRequest = RpcRequest.builder().rpcMessageType(RpcMessageType.HEART_BEAT).build();
-                channel.writeAndFlush(rpcRequest).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
+                RpcMessage rpcMessage = new RpcMessage();
+                rpcMessage.setCodec(SerializationTypeEnum.KRYO.getCode());
+                rpcMessage.setMessageType(RpcConstants.HEARTBEAT_REQUEST_TYPE);
+                rpcMessage.setData(RpcConstants.PING);
+                channel.writeAndFlush(rpcMessage).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
             } else {
                 super.userEventTriggered(ctx, evt);
             }

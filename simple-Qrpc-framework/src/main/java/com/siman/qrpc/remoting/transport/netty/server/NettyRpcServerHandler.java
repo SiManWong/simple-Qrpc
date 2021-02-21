@@ -1,8 +1,11 @@
 package com.siman.qrpc.remoting.transport.netty.server;
 
-import com.siman.qrpc.enums.RpcMessageType;
+import com.siman.qrpc.enums.RpcResponseCodeEnum;
+import com.siman.qrpc.enums.SerializationTypeEnum;
 import com.siman.qrpc.factory.SingletonFactory;
+import com.siman.qrpc.remoting.constans.RpcConstants;
 import com.siman.qrpc.remoting.handler.RpcRequestHandler;
+import com.siman.qrpc.remoting.model.RpcMessage;
 import com.siman.qrpc.remoting.model.RpcRequest;
 import com.siman.qrpc.remoting.model.RpcResponse;
 import io.netty.channel.*;
@@ -25,80 +28,52 @@ public class NettyRpcServerHandler extends ChannelInboundHandlerAdapter {
         this.rpcRequestHandler = SingletonFactory.getInstance(RpcRequestHandler.class);
     }
 
-//    @Override
-//    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-//        try {
-//            if (msg instanceof RpcMessage) {
-//                log.info("server receive msg: [{}] ", msg);
-//                byte messageType = ((RpcMessage) msg).getMessageType();
-//                RpcMessage rpcMessage = new RpcMessage();
-//                //TODO 设置序列化方式
-////                rpcMessage.setCodec(SerializationTypeEnum.PROTOSTUFF.getCode());
-//                //TODO 设置压缩方式
-////                rpcMessage.setCompress(CompressTypeEnum.GZIP.getCode());
-//                if (messageType == RpcConstants.HEARTBEAT_REQUEST_TYPE) {
-//                    rpcMessage.setMessageType(RpcConstants.HEARTBEAT_RESPONSE_TYPE);
-//                    rpcMessage.setData(RpcConstants.PONG);
-//                } else {
-//                    RpcRequest rpcRequest = (RpcRequest) ((RpcMessage) msg).getData();
-//                    // 执行目标方法并返回结果
-//                    Object result = rpcRequestHandler.handle(rpcRequest);
-//                    log.info(String.format("server get result: %s", result.toString()));
-//                    rpcMessage.setMessageType(RpcConstants.HEARTBEAT_RESPONSE_TYPE);
-//                    // 通道活跃且可写
-//                    if (ctx.channel().isActive() && ctx.channel().isWritable()) {
-//                        RpcResponse<Object> rpcResponse = RpcResponse.success(result, rpcRequest.getRequestId());
-//                        rpcMessage.setData(rpcResponse);
-//                    } else {
-//                        RpcResponse<Object> rpcResponse = RpcResponse.fail(RpcResponseCodeEnum.FAIL);
-//                        rpcMessage.setData(rpcResponse);
-//                        log.error("not writable now, message dropped");
-//                    }
-//                }
-//                ctx.writeAndFlush(rpcMessage).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
-//            }
-//        } finally {
-//            // 是否 ByteBuf，防止内存泄漏
-//            ReferenceCountUtil.release(msg);
-//        }
-//    }
-
-
     /**
      * 读取从客户端消息，然后调用目标服务的目标方法并返回给客户端。
      */
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
         try {
-            RpcRequest rpcRequest = (RpcRequest) msg;
-            log.info(String.format("server receive msg: %s", rpcRequest));
-            if (rpcRequest.getRpcMessageType() == RpcMessageType.HEART_BEAT) {
-                log.info("receive heat beat msg from client");
-                return;
-            }
-            //执行目标方法（客户端需要执行的方法）并且返回方法结果
-            Object result = rpcRequestHandler.handle(rpcRequest);
-            log.info(String.format("server get result: %s", result.toString()));
-            if (ctx.channel().isActive() && ctx.channel().isWritable()) {
-                // 将 result 封装为 RpcResponse 响应给客户端
-                RpcResponse<Object> rpcResponse = RpcResponse.success(result, rpcRequest.getRequestId());
-                ctx.writeAndFlush(rpcResponse).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
-            } else {
-                log.error("not writable now, message dropped");
+            if (msg instanceof RpcMessage) {
+                log.info("server receive msg: [{}]", msg);
+                byte messageType = ((RpcMessage) msg).getMessageType();
+                RpcMessage rpcMessage = new RpcMessage();
+                // 心跳请求
+                if (messageType == RpcConstants.HEARTBEAT_REQUEST_TYPE) {
+                    rpcMessage.setData(SerializationTypeEnum.KRYO.getCode());
+                    rpcMessage.setMessageType(RpcConstants.HEARTBEAT_RESPONSE_TYPE);
+                    rpcMessage.setData(RpcConstants.PONG);
+                } else {
+                    RpcRequest rpcRequest = (RpcRequest)((RpcMessage) msg).getData();
+                    // 执行目标方法并返回调用结果
+                    Object result = rpcRequestHandler.handle(rpcRequest);
+                    log.info(String.format("server get result: %s", result.toString()));
+                    if (ctx.channel().isActive() && ctx.channel().isWritable()) {
+                        RpcResponse<Object> rpcResponse = RpcResponse.success(result, rpcRequest.getRequestId());
+                        rpcMessage.setData(rpcResponse);
+                        rpcMessage.setCodec(SerializationTypeEnum.KRYO.getCode());
+                        rpcMessage.setMessageType(RpcConstants.RESPONSE_TYPE);
+                    } else {
+                        RpcResponse<Object> rpcResponse = RpcResponse.fail(RpcResponseCodeEnum.FAIL);
+                        rpcMessage.setData(rpcResponse);
+                        log.error("not writable now, message dropped");
+                    }
+                }
+                ctx.writeAndFlush(rpcMessage).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
             }
         } finally {
-            //确保 ByteBuf 被释放，不然可能会有内存泄露问题
             ReferenceCountUtil.release(msg);
         }
-
     }
+
+
 
     @Override
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
         if (evt instanceof IdleStateEvent) {
             IdleState state = ((IdleStateEvent) evt).state();
             if (state == IdleState.READER_IDLE) {
-                log.info("idle check happen, so close the conneciton");
+                log.info("idle check happen, so close the connection");
                 ctx.close();
             } else {
                 super.userEventTriggered(ctx, evt);

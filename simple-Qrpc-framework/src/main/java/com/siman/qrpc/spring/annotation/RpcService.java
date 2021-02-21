@@ -8,7 +8,6 @@ import java.lang.annotation.*;
  * @author SiMan
  * @date 2021/2/2 0:35
  */
-@Component
 @Inherited
 @Documented
 @Target({ElementType.TYPE})

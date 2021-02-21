@@ -1,7 +1,6 @@
 package com.siman.qrpc.remoting.model;
 
 import com.siman.qrpc.entity.RpcServiceProperties;
-import com.siman.qrpc.enums.RpcMessageType;
 import lombok.*;
 
 import java.io.Serializable;
@@ -11,7 +10,6 @@ import java.io.Serializable;
  * @author SiMan
  * @date 2020/12/25 18:09
  */
-
 @AllArgsConstructor
 @Data
 @Builder
@@ -23,7 +21,6 @@ public class RpcRequest implements Serializable {
     private String methodName;
     private Object[] parameters;
     private Class<?>[] paramTypes;
-    private RpcMessageType rpcMessageType;
     private String version;
     private String group;
 

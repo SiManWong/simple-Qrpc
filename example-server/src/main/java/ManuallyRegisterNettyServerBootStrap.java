@@ -4,6 +4,7 @@ import com.siman.qrpc.provider.ServiceProviderImpl;
 import com.siman.qrpc.remoting.transport.netty.server.NettyRpcServer;
 import com.siman.qrpc.service.HelloService;
 import com.siman.qrpc.serviceimpl.HelloServiceImpl;
+import com.siman.qrpc.spring.annotation.RpcScan;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
@@ -12,17 +13,17 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
  * @author SiMan
  * @date 2021/2/1 21:44
  */
-
-public class NettyServerBootStrap2 {
+@RpcScan(basePackage = {"com.siman.qrpc"})
+public class ManuallyRegisterNettyServerBootStrap {
     public static void main(String[] args) {
-        HelloService helloService = new HelloServiceImpl();
-        ApplicationContext applicationContext = new AnnotationConfigApplicationContext(NettyServerBootStrap.class);
-        NettyRpcServer nettyRpcServer = applicationContext.getBean(NettyRpcServer.class);
-        nettyRpcServer.start();
+        ApplicationContext applicationContext = new AnnotationConfigApplicationContext(AutoRegisterNettyServerBootStrap.class);
+        NettyRpcServer nettyRpcServer = (NettyRpcServer)applicationContext.getBean("nettyRpcServer");
 
-        ServiceProvider serviceProvider = new ServiceProviderImpl();
+        HelloService helloService = new HelloServiceImpl();
         RpcServiceProperties rpcServiceProperties = RpcServiceProperties.builder()
-                .group("test").version("1").build();
+                .group("test").version("2.0").build();
+        ServiceProvider serviceProvider = new ServiceProviderImpl();
         serviceProvider.publishService(helloService, rpcServiceProperties);
+        nettyRpcServer.start();
     }
 }

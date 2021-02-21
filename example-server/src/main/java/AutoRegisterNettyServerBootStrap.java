@@ -7,11 +7,11 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
  * @author SiMan
  * @date 2021/1/23 0:02
  */
-@RpcScan(basePackage = {"com.siman.qrpc.serviceimpl"})
-public class NettyServerBootStrap {
+@RpcScan(basePackage = {"com.siman.qrpc"})
+public class AutoRegisterNettyServerBootStrap {
     public static void main(String[] args) {
-        new AnnotationConfigApplicationContext(NettyServerBootStrap.class);
-        NettyRpcServer nettyRpcServer = new NettyRpcServer();
+        AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext(AutoRegisterNettyServerBootStrap.class);
+        NettyRpcServer nettyRpcServer = (NettyRpcServer) applicationContext.getBean("nettyRpcServer");
         nettyRpcServer.start();
     }
 }
