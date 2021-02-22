@@ -1,6 +1,5 @@
 package com.siman.qrpc.extension;
 
-import com.siman.qrpc.util.Holder;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.BufferedReader;

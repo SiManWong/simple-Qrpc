@@ -1,4 +1,4 @@
-package com.siman.qrpc.util;
+package com.siman.qrpc.extension;
 
 /**
  * @author SiMan

@@ -14,8 +14,8 @@ import java.util.Properties;
  * @date 2021/2/3 2:06
  */
 @Slf4j
-public final class PropertiesFileUtils {
-    private PropertiesFileUtils() {}
+public final class PropertiesFileUtil {
+    private PropertiesFileUtil() {}
 
     public static Properties readPropertiesFile(String fileName){
         String rpcConfigPath = "";
