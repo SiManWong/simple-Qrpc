@@ -22,7 +22,10 @@ public class RpcMessage {
      * 序列化类型
      */
     private byte codec;
-
+    /**
+     * 压缩方式
+     */
+    private byte compress;
     /**
      * 请求id
      */

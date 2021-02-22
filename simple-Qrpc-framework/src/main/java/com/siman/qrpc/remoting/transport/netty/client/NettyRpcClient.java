@@ -1,5 +1,6 @@
 package com.siman.qrpc.remoting.transport.netty.client;
 
+import com.siman.qrpc.enums.CompressTypeEnum;
 import com.siman.qrpc.enums.SerializationTypeEnum;
 import com.siman.qrpc.extension.ExtensionLoader;
 import com.siman.qrpc.factory.SingletonFactory;
@@ -104,6 +105,7 @@ public final class NettyRpcClient implements RpcRequestTransport {
             RpcMessage rpcMessage = new RpcMessage();
             rpcMessage.setMessageType(RpcConstants.REQUEST_TYPE);
             rpcMessage.setCodec(SerializationTypeEnum.KRYO.getCode());
+            rpcMessage.setCompress(CompressTypeEnum.GZIP.getCode());
             rpcMessage.setData(rpcRequest);
             channel.writeAndFlush(rpcMessage).addListener((ChannelFutureListener) future -> {
                 if (future.isSuccess()) {

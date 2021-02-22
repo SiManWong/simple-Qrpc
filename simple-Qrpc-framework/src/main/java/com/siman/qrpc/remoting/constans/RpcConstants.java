@@ -20,7 +20,7 @@ public class RpcConstants {
 
     public static final byte VERSION = 1;
 
-    public static final byte TOTAL_LENGTH = 15;
+    public static final byte TOTAL_LENGTH = 16;
 
     public static final byte REQUEST_TYPE = 1;
 
@@ -36,7 +36,7 @@ public class RpcConstants {
      */
     public static final byte HEARTBEAT_RESPONSE_TYPE = 4;
 
-    public static final int HEAD_LENGTH = 15;
+    public static final int HEAD_LENGTH = 16;
 
     public static final String PING = "ping";
 

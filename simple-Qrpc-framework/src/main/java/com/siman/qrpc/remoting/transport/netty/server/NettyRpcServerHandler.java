@@ -1,5 +1,6 @@
 package com.siman.qrpc.remoting.transport.netty.server;
 
+import com.siman.qrpc.enums.CompressTypeEnum;
 import com.siman.qrpc.enums.RpcResponseCodeEnum;
 import com.siman.qrpc.enums.SerializationTypeEnum;
 import com.siman.qrpc.factory.SingletonFactory;
@@ -40,7 +41,8 @@ public class NettyRpcServerHandler extends ChannelInboundHandlerAdapter {
                 RpcMessage rpcMessage = new RpcMessage();
                 // 心跳请求
                 if (messageType == RpcConstants.HEARTBEAT_REQUEST_TYPE) {
-                    rpcMessage.setData(SerializationTypeEnum.KRYO.getCode());
+                    rpcMessage.setCodec(SerializationTypeEnum.KRYO.getCode());
+                    rpcMessage.setCompress(CompressTypeEnum.GZIP.getCode());
                     rpcMessage.setMessageType(RpcConstants.HEARTBEAT_RESPONSE_TYPE);
                     rpcMessage.setData(RpcConstants.PONG);
                 } else {
@@ -52,6 +54,7 @@ public class NettyRpcServerHandler extends ChannelInboundHandlerAdapter {
                         RpcResponse<Object> rpcResponse = RpcResponse.success(result, rpcRequest.getRequestId());
                         rpcMessage.setData(rpcResponse);
                         rpcMessage.setCodec(SerializationTypeEnum.KRYO.getCode());
+                        rpcMessage.setCompress(CompressTypeEnum.GZIP.getCode());
                         rpcMessage.setMessageType(RpcConstants.RESPONSE_TYPE);
                     } else {
                         RpcResponse<Object> rpcResponse = RpcResponse.fail(RpcResponseCodeEnum.FAIL);

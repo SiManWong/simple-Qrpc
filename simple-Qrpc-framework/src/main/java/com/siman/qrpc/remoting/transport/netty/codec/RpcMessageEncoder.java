@@ -1,5 +1,7 @@
 package com.siman.qrpc.remoting.transport.netty.codec;
 
+import com.siman.qrpc.compress.Compress;
+import com.siman.qrpc.enums.CompressTypeEnum;
 import com.siman.qrpc.enums.SerializationTypeEnum;
 import com.siman.qrpc.extension.ExtensionLoader;
 import com.siman.qrpc.remoting.constans.RpcConstants;
@@ -18,9 +20,9 @@ import java.util.concurrent.atomic.AtomicInteger;
  * 自定义协议编码器
  *
  *   <pre>
- *   0     1     2     3     4        5     6     7     8     9          10       11     12    13    14   15
- *   +-----+-----+-----+-----+--------+----+----+----+------+-----------+-------+-----------+-----+-----+-----+
- *   |   magic   code        |version | Full length         | messageType| codec| RequestId                   |
+ *   0     1     2     3     4        5     6     7     8         9          10      11     12  13  14   15 16
+ *   +-----+-----+-----+-----+--------+----+----+----+------+-----------+-------+----- --+-----+-----+-------+
+ *   |   magic   code        |version | full length         | messageType| codec|compress|    RequestId       |
  *   +-----------------------+--------+---------------------+-----------+-----------+-----------+------------+
  *   |                                                                                                       |
  *   |                                         body                                                          |
@@ -28,7 +30,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  *   |                                        ... ...                                                        |
  *   +-------------------------------------------------------------------------------------------------------+
  *  4B  magic code（魔法数）  1B version（版本）  4B full length（消息长度）  1B messageType（消息类型）
- *  1B codec（序列化类型）    4B  requestId（请求的Id）
+ *  1B codec（序列化类型） 1B compress（压缩类型）   4B  requestId（请求的Id）
  *  body（object类型数据）
  *  </pre>
  *
@@ -52,9 +54,11 @@ public class RpcMessageEncoder extends MessageToByteEncoder<RpcMessage> {
             // 留出位置写入数据包的长度
             out.writerIndex(out.writerIndex() + 4);
             // 设置消息类型
-            out.writeByte(rpcMessage.getMessageType());
+            out.writeByte(messageType);
             // 设置序列化
             out.writeByte(rpcMessage.getCodec());
+            // 设置压缩类型
+            out.writeByte(CompressTypeEnum.GZIP.getCode());
             out.writeInt(ATOMIC_INTEGER.getAndDecrement());
             byte[] bodyBytes = null;
 
@@ -66,6 +70,11 @@ public class RpcMessageEncoder extends MessageToByteEncoder<RpcMessage> {
                 Serializer serializer = ExtensionLoader.getExtensionLoader(Serializer.class)
                         .getExtension(codecName);
                 bodyBytes = serializer.serialize(rpcMessage.getData());
+                // 压缩消息体
+                String compressName = CompressTypeEnum.getName(rpcMessage.getCompress());
+                Compress compress = ExtensionLoader.getExtensionLoader(Compress.class)
+                        .getExtension(compressName);
+                bodyBytes = compress.compress(bodyBytes);
                 fullLength += bodyBytes.length;
             }
 

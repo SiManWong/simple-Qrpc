@@ -1,6 +1,6 @@
 package com.siman.qrpc.registry.zk.util;
 
-import com.siman.qrpc.enums.RpcConfigProperties;
+import com.siman.qrpc.enums.RpcConfigEnum;
 import com.siman.qrpc.exception.RpcException;
 import com.siman.qrpc.util.file.PropertiesFileUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -46,9 +46,9 @@ public final class CuratorUtils {
     public static CuratorFramework getZkClient() {
         // 通过配置文件获取 zookeeper 地址
         Properties properties = null;
-        properties = PropertiesFileUtils.readPropertiesFile(RpcConfigProperties.RPC_CONFIG_PATH.getPropertyValue());
+        properties = PropertiesFileUtils.readPropertiesFile(RpcConfigEnum.RPC_CONFIG_PATH.getPropertyValue());
         if (properties != null) {
-            defaultZookeeperAddress = properties.getProperty(RpcConfigProperties.ZK_ADDRESS.getPropertyValue());
+            defaultZookeeperAddress = properties.getProperty(RpcConfigEnum.ZK_ADDRESS.getPropertyValue());
         }
         if (zkClient != null && zkClient.getState() == CuratorFrameworkState.STARTED) {
             return zkClient;
