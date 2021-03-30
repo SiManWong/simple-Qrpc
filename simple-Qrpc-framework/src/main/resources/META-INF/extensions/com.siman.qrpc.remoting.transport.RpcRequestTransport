@@ -1,0 +1,2 @@
+netty=com.siman.qrpc.remoting.transport.netty.client.NettyRpcClient
+socket=com.siman.qrpc.remoting.transport.socket.SocketRpcClient

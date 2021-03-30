@@ -1,12 +1,15 @@
 package com.siman.qrpc.enums;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
 /**
  * @author SiMan
  * @date 2020/12/25 1:38
  */
-
+@Getter
+@AllArgsConstructor
 public enum RpcErrorMessageEnum {
-    //
     CLIENT_CONNECT_SERVER_FAILURE("客户端连接服务端失败"),
     SERVICE_INVOCATION_FAILURE("服务调用失败"),
     SERVICE_CAN_NOT_BE_FOUND("没有找到指定的服务"),
@@ -14,14 +17,6 @@ public enum RpcErrorMessageEnum {
     REQUEST_NOT_MATCH_RESPONSE("返回结果错误！请求和返回的相应不匹配");
 
     private final String message;
-
-    RpcErrorMessageEnum(String message) {
-        this.message = message;
-    }
-
-    public String getMessage() {
-        return message;
-    }
 
     @Override
     public String toString() {

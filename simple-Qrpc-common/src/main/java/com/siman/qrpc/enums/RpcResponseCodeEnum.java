@@ -1,5 +1,7 @@
 package com.siman.qrpc.enums;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.ToString;
 
 /**
@@ -7,6 +9,8 @@ import lombok.ToString;
  * @date 2020/12/25 18:13
  */
 @ToString
+@Getter
+@AllArgsConstructor
 public enum RpcResponseCodeEnum {
 
     // 成功
@@ -17,17 +21,4 @@ public enum RpcResponseCodeEnum {
     private final int code;
 
     private final String message;
-
-    RpcResponseCodeEnum(int code, String message) {
-        this.code = code;
-        this.message = message;
-    }
-
-    public int getCode() {
-        return code;
-    }
-
-    public String getMessage() {
-        return message;
-    }
 }

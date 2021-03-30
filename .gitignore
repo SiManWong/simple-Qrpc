@@ -1,2 +1,14 @@
-# Project exclude paths
+/.idea/
+/target/
+/simple-Qrpc-framework/target/
 /simple-Qrpc-common/target/
+/public-interface-api/target/
+/example-server/target/
+/example-client/target/
+/example-server/example-server.iml
+/example-client/example-client.iml
+
+/.settings
+*/.settings
+.classpath
+.project

@@ -1,12 +1,11 @@
-package com.siman.qrpc.serialize;
+package com.siman.qrpc.remoting.model;
 
 import lombok.*;
 
 /**
  * @author SiMan
- * @date 2021/1/20 15:07
+ * @date 2021/2/19 23:54
  */
-
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -14,26 +13,26 @@ import lombok.*;
 @Builder
 @ToString
 public class RpcMessage {
-
     /**
      * 消息类型
      */
     private byte messageType;
+
     /**
-     * 序列化方式
+     * 序列化类型
      */
     private byte codec;
     /**
-     * 压缩类型
+     * 压缩方式
      */
     private byte compress;
     /**
-     * request id
+     * 请求id
      */
     private int requestId;
+
     /**
-     * request data
+     * 数据内容
      */
     private Object data;
-
 }

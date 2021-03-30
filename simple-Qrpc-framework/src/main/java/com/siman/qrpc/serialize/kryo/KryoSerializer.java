@@ -1,4 +1,4 @@
-package com.siman.qrpc.serialize.impl;
+package com.siman.qrpc.serialize.kryo;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
@@ -7,7 +7,6 @@ import com.siman.qrpc.exception.SerializeException;
 import com.siman.qrpc.remoting.model.RpcRequest;
 import com.siman.qrpc.remoting.model.RpcResponse;
 import com.siman.qrpc.serialize.Serializer;
-import com.siman.qrpc.serialize.SerializerAlgorithm;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -60,8 +59,4 @@ public class KryoSerializer implements Serializer {
         }
     }
 
-    @Override
-    public byte getSerializerAlgorithm() {
-        return SerializerAlgorithm.KRYO;
-    }
 }

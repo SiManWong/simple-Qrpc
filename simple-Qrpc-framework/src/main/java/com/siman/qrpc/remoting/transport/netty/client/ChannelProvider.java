@@ -1,5 +1,6 @@
 package com.siman.qrpc.remoting.transport.netty.client;
 
+import com.siman.qrpc.factory.SingletonFactory;
 import io.netty.channel.Channel;
 import lombok.extern.slf4j.Slf4j;
 
@@ -24,16 +25,17 @@ public class ChannelProvider {
 
     public Channel get(InetSocketAddress inetSocketAddress) {
         String key = inetSocketAddress.toString();
-        // 确保地址存在连接
+        // 判断是否有对应地址的连接
         if (channelMap.containsKey(key)) {
             Channel channel = channelMap.get(key);
-            // 连接可用
+            // 判断连接是否可用
             if (channel != null && channel.isActive()) {
                 return channel;
             } else {
                 channelMap.remove(key);
             }
         }
+
         return null;
     }
 

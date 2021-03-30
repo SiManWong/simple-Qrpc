@@ -10,7 +10,6 @@ import java.io.Serializable;
  * @author SiMan
  * @date 2020/12/25 18:09
  */
-
 @AllArgsConstructor
 @Data
 @Builder
@@ -24,10 +23,13 @@ public class RpcRequest implements Serializable {
     private Class<?>[] paramTypes;
     private String version;
     private String group;
+    private String serialize;
 
     public RpcRequest() {}
 
     public RpcServiceProperties toRpcProperties() {
-        return RpcServiceProperties.builder().serviceName(this.getInterfaceName()).build();
+        return RpcServiceProperties.builder().serviceName(this.getInterfaceName())
+                .version(this.getVersion())
+                .group(this.getGroup()).build();
     }
 }

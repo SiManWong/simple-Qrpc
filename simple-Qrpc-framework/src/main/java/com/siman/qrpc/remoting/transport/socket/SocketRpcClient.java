@@ -1,6 +1,9 @@
 package com.siman.qrpc.remoting.transport.socket;
 
+import com.siman.qrpc.entity.RpcServiceProperties;
 import com.siman.qrpc.exception.RpcException;
+import com.siman.qrpc.extension.ExtensionLoader;
+import com.siman.qrpc.registry.ServiceDiscover;
 import com.siman.qrpc.remoting.model.RpcRequest;
 import com.siman.qrpc.remoting.transport.RpcRequestTransport;
 import lombok.extern.slf4j.Slf4j;
@@ -17,13 +20,16 @@ import java.net.Socket;
  */
 @Slf4j
 public class SocketRpcClient implements RpcRequestTransport {
-
+    private final ServiceDiscover serviceDiscover;
     public SocketRpcClient() {
+        this.serviceDiscover = ExtensionLoader.getExtensionLoader(ServiceDiscover.class).getExtension("zk");
     }
 
     @Override
     public Object sendRpcRequest(RpcRequest rpcRequest) {
-        InetSocketAddress inetSocketAddress = new InetSocketAddress("127.0.0.1", 9998);
+        String rpcServiceName = RpcServiceProperties.builder().serviceName(rpcRequest.getInterfaceName())
+                .group(rpcRequest.getGroup()).version(rpcRequest.getVersion()).build().toRpcServiceName();
+        InetSocketAddress inetSocketAddress = serviceDiscover.lookupService(rpcServiceName);
         try (Socket socket = new Socket()) {
             socket.connect(inetSocketAddress);
             ObjectOutputStream objectOutputStream = new ObjectOutputStream(socket.getOutputStream());

@@ -7,17 +7,19 @@ import com.siman.qrpc.entity.RpcServiceProperties;
  * @author SiMan
  * @date 2020/12/28 1:53
  */
-
 public interface ServiceProvider {
     /**
      * 添加服务
      * @param service
+     */
+    void addService(Object service);
+
+    /**
+     * 添加服务
+     * @param service
      * @param serviceClass
-     * @param rpcServiceProperties
      */
     void addService(Object service, Class<?> serviceClass, RpcServiceProperties rpcServiceProperties);
-
-    void addService(Object service);
     /**
      * 获取服务
      * @param rpcServiceProperties 服务相关配置
@@ -27,14 +29,14 @@ public interface ServiceProvider {
 
     /**
      * 发布服务
-     * @param service service object
+     * @param service              service object
+     * @param rpcServiceProperties service related attributes
      */
-    void publishService(Object service);
+    void publishService(Object service, RpcServiceProperties rpcServiceProperties);
 
     /**
      * 发布服务
-     * @param service              服务对象
-     * @param rpcServiceProperties 服务相关配置
+     * @param service service object
      */
-    void publishService(Object service, RpcServiceProperties rpcServiceProperties);
+    void publishService(Object service);
 }

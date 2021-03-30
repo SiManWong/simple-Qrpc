@@ -1,17 +1,20 @@
 package com.siman.qrpc.proxy;
 
 import com.siman.qrpc.entity.RpcServiceProperties;
+import com.siman.qrpc.remoting.model.RpcMessageChecker;
 import com.siman.qrpc.remoting.model.RpcRequest;
 import com.siman.qrpc.remoting.model.RpcResponse;
 import com.siman.qrpc.remoting.transport.RpcRequestTransport;
 import com.siman.qrpc.remoting.transport.netty.client.NettyRpcClient;
 import com.siman.qrpc.remoting.transport.socket.SocketRpcClient;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * 动态代理类。当动态代理对象调用一个方法的时候，实际调用的是下面的 invoke 方法
@@ -30,12 +33,12 @@ public class RpcClientProxy implements InvocationHandler {
 
     public RpcClientProxy(RpcRequestTransport rpcRequestTransport, RpcServiceProperties rpcServiceProperties) {
         this.rpcRequestTransport = rpcRequestTransport;
-//        if (rpcServiceProperties.getGroup() == null) {
-//            rpcServiceProperties.setGroup("");
-//        }
-//        if (rpcServiceProperties.getVersion() == null) {
-//            rpcServiceProperties.setVersion("");
-//        }
+        if (rpcServiceProperties.getGroup() == null) {
+            rpcServiceProperties.setGroup("");
+        }
+        if (rpcServiceProperties.getVersion() == null) {
+            rpcServiceProperties.setVersion("");
+        }
         this.serviceProperties = rpcServiceProperties;
     }
 
@@ -57,13 +60,17 @@ public class RpcClientProxy implements InvocationHandler {
      */
     @Override
     @SuppressWarnings("unchecked")
+    @SneakyThrows
     public Object invoke(Object proxy, Method method, Object[] args) {
         log.info("invoked method: [{}]", method.getName());
         RpcRequest rpcRequest = RpcRequest.builder().methodName(method.getName())
                 .parameters(args)
                 .interfaceName(method.getDeclaringClass().getName())
                 .paramTypes(method.getParameterTypes())
-                .requestId(UUID.randomUUID().toString()).build();
+                .requestId(UUID.randomUUID().toString())
+                .group(serviceProperties.getGroup())
+                .version(serviceProperties.getVersion())
+                .build();
         RpcResponse<Object> rpcResponse = null;
         // 基于 Socket 实现
         if (rpcRequestTransport instanceof SocketRpcClient) {
@@ -71,8 +78,10 @@ public class RpcClientProxy implements InvocationHandler {
         }
         // 基于 Netty 实现
         if (rpcRequestTransport instanceof NettyRpcClient) {
-            rpcResponse = (RpcResponse<Object>) rpcRequestTransport.sendRpcRequest(rpcRequest);
+            CompletableFuture<RpcResponse> completableFuture = (CompletableFuture<RpcResponse>) rpcRequestTransport.sendRpcRequest(rpcRequest);
+            rpcResponse = completableFuture.get();
         }
+        RpcMessageChecker.check(rpcResponse, rpcRequest);
         return rpcResponse.getData();
     }
 }

@@ -16,14 +16,8 @@ public class RpcConstants {
      */
     public static final byte[] MAGIC_NUMBER = {(byte) 'q', (byte) 'r', (byte) 'p', (byte) 'c'};
 
-    /**
-     * 默认字符集
-     */
     public static final Charset DEFAULT_CHARSET = CharsetUtil.UTF_8;
 
-    /**
-     * 版本信息
-     */
     public static final byte VERSION = 1;
 
     public static final byte TOTAL_LENGTH = 16;
@@ -33,12 +27,12 @@ public class RpcConstants {
     public static final byte RESPONSE_TYPE = 2;
 
     /**
-     * ping
+     * 心跳请求
      */
     public static final byte HEARTBEAT_REQUEST_TYPE = 3;
 
     /**
-     * pong
+     * 心跳响应
      */
     public static final byte HEARTBEAT_RESPONSE_TYPE = 4;
 
