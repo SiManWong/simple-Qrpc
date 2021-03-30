@@ -67,6 +67,7 @@ public class ExtensionLoader<T> {
             synchronized (holder) {
                 instance = holder.get();
                 if (instance == null) {
+                    // 关键方法
                     instance = createExtension(name);
                     holder.set(instance);
                 }
@@ -76,13 +77,16 @@ public class ExtensionLoader<T> {
     }
 
     private T createExtension(String name) {
+        // 获取实现类
         Class<?> clazz = getExtensionClass().get(name);
         if (clazz == null) {
             throw new RuntimeException("No such extension of name " + name);
         }
+        // 获取缓存
         T instance = (T) EXTENSION_INSTANCES.get(clazz);
         if (instance == null) {
             try {
+                // 通过反射创建实例，如果已经存在则不存入
                 EXTENSION_INSTANCES.putIfAbsent(clazz, clazz.newInstance());
                 instance = (T) EXTENSION_INSTANCES.get(clazz);
             } catch (Exception e) {
@@ -94,8 +98,9 @@ public class ExtensionLoader<T> {
     }
 
     private Map<String, Class<?>> getExtensionClass() {
-        // get the loaded extension class from the cache
+        // 从缓存中获取拓展类
         Map<String, Class<?>> classes = cachedClasses.get();
+        // 双检锁
         if (classes == null) {
             synchronized (cachedClasses) {
                 classes = cachedClasses.get();
@@ -109,6 +114,10 @@ public class ExtensionLoader<T> {
         return classes;
     }
 
+    /**
+     * 获取文件目录
+     * @param extensionClasses
+     */
     private void loadDirectory(Map<String, Class<?>> extensionClasses) {
         String fileName = SERVICE_DIRECTORY + type.getName();
         try {
@@ -126,6 +135,12 @@ public class ExtensionLoader<T> {
         }
     }
 
+    /**
+     * 加载资源
+     * @param extensionClasses
+     * @param classLoader
+     * @param resourceUrl
+     */
     private void loadResource(Map<String, Class<?>> extensionClasses, ClassLoader classLoader, URL resourceUrl) {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(resourceUrl.openStream(), UTF_8))) {
             String line;

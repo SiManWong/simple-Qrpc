@@ -1,11 +1,9 @@
 package com.siman.qrpc.remoting.transport.netty.server;
 
-import com.siman.qrpc.extension.ExtensionLoader;
-import com.siman.qrpc.remoting.model.RpcRequest;
-import com.siman.qrpc.remoting.model.RpcResponse;
+import com.siman.qrpc.config.CustomShutdownHook;
 import com.siman.qrpc.remoting.transport.netty.codec.RpcMessageDecoder;
 import com.siman.qrpc.remoting.transport.netty.codec.RpcMessageEncoder;
-import com.siman.qrpc.serialize.Serializer;
+import com.siman.qrpc.util.threadpool.ThreadPoolFactoryUtils;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -14,6 +12,7 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.timeout.IdleStateHandler;
+import io.netty.util.concurrent.DefaultEventExecutorGroup;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -32,11 +31,20 @@ import java.util.concurrent.TimeUnit;
 public class NettyRpcServer{
     public static final int PORT = 9998;
 
+    public NettyRpcServer() {}
+
     @SneakyThrows
     public void start() {
+        CustomShutdownHook.getCustomShutdownHook().clearAll();
         String host = InetAddress.getLocalHost().getHostAddress();
         EventLoopGroup bossGroup = new NioEventLoopGroup(1);
         EventLoopGroup workerGroup = new NioEventLoopGroup();
+        // 自定义服务处理线程组，避免耗时任务造成阻塞
+        DefaultEventExecutorGroup serviceHandlerGroup = new DefaultEventExecutorGroup(
+                // 线程数：Cpu核数 * 2
+                Runtime.getRuntime().availableProcessors() * 2,
+                ThreadPoolFactoryUtils.createThreadFactory("service-handler-group", false)
+        );
 
         try {
             ServerBootstrap bootstrap = new ServerBootstrap();
@@ -54,7 +62,7 @@ public class NettyRpcServer{
                             // 编码器
                             pipeline.addLast("encode", new RpcMessageEncoder());
                             // 请求处理器
-                            pipeline.addLast(new NettyRpcServerHandler());
+                            pipeline.addLast(serviceHandlerGroup,new NettyRpcServerHandler());
                         }
                     })
                     // 是否开启 Nagle 算法

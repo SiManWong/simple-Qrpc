@@ -27,7 +27,7 @@ public class ZkServiceDiscover implements ServiceDiscover {
         CuratorFramework zkClient = CuratorUtils.getZkClient();
         List<String> serviceAddresses = CuratorUtils.getChildrenNodes(zkClient, serviceName);
         // 负载均衡
-        String serviceAddress = loadBalance.selectServiceAddress(serviceAddresses);
+        String serviceAddress = loadBalance.selectServiceAddress(serviceAddresses, serviceName);
 
         log.info("成功找到服务地址:{}", serviceAddress);
 

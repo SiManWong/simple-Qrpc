@@ -25,11 +25,11 @@ import java.net.InetSocketAddress;
 @Slf4j
 public class NettyRpcClientHandler extends ChannelInboundHandlerAdapter {
     private final UnprocessedRequests unprocessedRequests;
-    private final ChannelProvider channelProvider;
+    private final NettyRpcClient nettyRpcClient;
 
     public NettyRpcClientHandler() {
         this.unprocessedRequests = SingletonFactory.getInstance(UnprocessedRequests.class);
-        this.channelProvider = SingletonFactory.getInstance(ChannelProvider.class);
+        this.nettyRpcClient = SingletonFactory.getInstance(NettyRpcClient.class);
     }
 
     /**
@@ -60,7 +60,7 @@ public class NettyRpcClientHandler extends ChannelInboundHandlerAdapter {
             IdleState state = ((IdleStateEvent) evt).state();
             if (state == IdleState.WRITER_IDLE) {
                 log.info("write idle happen [{}]", ctx.channel().remoteAddress());
-                Channel channel = channelProvider.get((InetSocketAddress) ctx.channel().remoteAddress());
+                Channel channel = nettyRpcClient.getChannel((InetSocketAddress) ctx.channel().remoteAddress());
                 RpcMessage rpcMessage = new RpcMessage();
                 rpcMessage.setCodec(SerializationTypeEnum.KRYO.getCode());
                 rpcMessage.setMessageType(RpcConstants.HEARTBEAT_REQUEST_TYPE);

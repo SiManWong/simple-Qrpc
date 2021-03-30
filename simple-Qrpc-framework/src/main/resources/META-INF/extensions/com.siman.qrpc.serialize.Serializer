@@ -1,1 +1,2 @@
-kryo=com.siman.qrpc.serialize.impl.KryoSerializer
+kryo=com.siman.qrpc.serialize.kryo.KryoSerializer
+protostuff=com.siman.qrpc.serialize.Protostuff.ProtostuffSerializer

@@ -24,6 +24,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.InetSocketAddress;
+import java.util.Date;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -41,6 +42,8 @@ public final class NettyRpcClient implements RpcRequestTransport {
     private final ServiceDiscover serviceDiscover;
     private final UnprocessedRequests unprocessedRequests;
     private final ChannelProvider channelProvider;
+    private static final int MAX_RETRY = 5;
+
 
     public NettyRpcClient() {
         eventLoopGroup = new NioEventLoopGroup();
@@ -71,14 +74,22 @@ public final class NettyRpcClient implements RpcRequestTransport {
     }
 
     @SneakyThrows
-    public Channel doConnect(InetSocketAddress inetSocketAddress) {
+    public Channel doConnect(InetSocketAddress inetSocketAddress, int retry) {
         CompletableFuture<Channel> completableFuture = new CompletableFuture<>();
-        bootstrap.connect(inetSocketAddress).addListener((ChannelFutureListener) future -> {
+        bootstrap.connect(inetSocketAddress).addListener( future -> {
             if (future.isSuccess()) {
                 log.info("客户端连接成功！");
-                completableFuture.complete(future.channel());
-            } else {
+                // 告知任务完成，并将 channelFuture 作为结果返回
+                completableFuture.complete(((ChannelFuture) future).channel());
+            } else if (MAX_RETRY == 0) {
                 throw new IllegalStateException();
+            } else {
+                // 第几次重连
+                int order = (MAX_RETRY - retry) + 1;
+                // 本次重连间隔
+                int delay = 1 << order;
+                log.info("连接[{}]失败， 第 {} 次重连...", inetSocketAddress.toString(), order);
+                bootstrap.config().group().schedule(()-> doConnect(inetSocketAddress, retry - 1), delay, TimeUnit.SECONDS);
             }
         });
         return completableFuture.get();
@@ -104,7 +115,7 @@ public final class NettyRpcClient implements RpcRequestTransport {
             unprocessedRequests.put(rpcRequest.getRequestId(), resultFuture);
             RpcMessage rpcMessage = new RpcMessage();
             rpcMessage.setMessageType(RpcConstants.REQUEST_TYPE);
-            rpcMessage.setCodec(SerializationTypeEnum.KRYO.getCode());
+            rpcMessage.setCodec(SerializationTypeEnum.PROTOSTUFF.getCode());
             rpcMessage.setCompress(CompressTypeEnum.GZIP.getCode());
             rpcMessage.setData(rpcRequest);
             channel.writeAndFlush(rpcMessage).addListener((ChannelFutureListener) future -> {
@@ -126,7 +137,7 @@ public final class NettyRpcClient implements RpcRequestTransport {
     public Channel getChannel(InetSocketAddress inetSocketAddress) {
         Channel channel = channelProvider.get(inetSocketAddress);
         if (channel == null) {
-            channel = doConnect(inetSocketAddress);
+            channel = doConnect(inetSocketAddress, MAX_RETRY);
             channelProvider.set(inetSocketAddress, channel);
         }
         return channel;

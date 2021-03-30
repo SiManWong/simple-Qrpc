@@ -1,4 +1,4 @@
-package com.siman.qrpc.serialize.impl;
+package com.siman.qrpc.serialize.kryo;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;

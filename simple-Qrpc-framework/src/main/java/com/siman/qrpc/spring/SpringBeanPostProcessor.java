@@ -1,6 +1,7 @@
 package com.siman.qrpc.spring;
 
 import com.siman.qrpc.entity.RpcServiceProperties;
+import com.siman.qrpc.extension.ExtensionLoader;
 import com.siman.qrpc.factory.SingletonFactory;
 import com.siman.qrpc.provider.ServiceProvider;
 import com.siman.qrpc.provider.ServiceProviderImpl;
@@ -30,7 +31,7 @@ public class SpringBeanPostProcessor implements BeanPostProcessor {
 
     public SpringBeanPostProcessor () {
         serviceProvider = SingletonFactory.getInstance(ServiceProviderImpl.class);
-        rpcClient = SingletonFactory.getInstance(NettyRpcClient.class);
+        rpcClient = ExtensionLoader.getExtensionLoader(RpcRequestTransport.class).getExtension("netty");
     }
 
     @Override
@@ -75,28 +76,4 @@ public class SpringBeanPostProcessor implements BeanPostProcessor {
         return bean;
     }
 
-//    @Override
-//    public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-//        Class<?> targetClass = bean.getClass();
-//        // 获取所有字段
-//        Field[] declaredFields = targetClass.getDeclaredFields();
-//        for (Field declaredField : declaredFields) {
-//            Reference reference = declaredField.getAnnotation(Reference.class);
-//            if (reference != null) {
-//                RpcServiceProperties rpcServiceProperties = RpcServiceProperties.builder()
-//                        .version(reference.version()).group(reference.group()).build();
-//                RpcClientProxy rpcClientProxy = new RpcClientProxy(rpcClient, rpcServiceProperties);
-//                Object proxy = rpcClientProxy.getProxy(declaredField.getType());
-//                // 访问私有属性
-//                declaredField.setAccessible(true);
-//                try {
-//                    // 给对象属性赋值
-//                    declaredField.set(bean, proxy);
-//                } catch (IllegalAccessException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//        }
-//        return bean;
-//    }
 }

@@ -44,6 +44,10 @@ public class ChannelProvider {
         channelMap.put(key, channel);
     }
 
-
+    public void remove(InetSocketAddress inetSocketAddress) {
+        String key = inetSocketAddress.toString();
+        channelMap.remove(key);
+        log.info("Channel map size :[{}]", channelMap.size());
+    }
 
 }

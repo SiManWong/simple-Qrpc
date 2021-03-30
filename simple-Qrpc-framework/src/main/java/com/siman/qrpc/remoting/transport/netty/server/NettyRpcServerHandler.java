@@ -39,10 +39,10 @@ public class NettyRpcServerHandler extends ChannelInboundHandlerAdapter {
                 log.info("server receive msg: [{}]", msg);
                 byte messageType = ((RpcMessage) msg).getMessageType();
                 RpcMessage rpcMessage = new RpcMessage();
+                rpcMessage.setCodec(SerializationTypeEnum.PROTOSTUFF.getCode());
+                rpcMessage.setCompress(CompressTypeEnum.GZIP.getCode());
                 // 心跳请求
                 if (messageType == RpcConstants.HEARTBEAT_REQUEST_TYPE) {
-                    rpcMessage.setCodec(SerializationTypeEnum.KRYO.getCode());
-                    rpcMessage.setCompress(CompressTypeEnum.GZIP.getCode());
                     rpcMessage.setMessageType(RpcConstants.HEARTBEAT_RESPONSE_TYPE);
                     rpcMessage.setData(RpcConstants.PONG);
                 } else {
@@ -50,12 +50,10 @@ public class NettyRpcServerHandler extends ChannelInboundHandlerAdapter {
                     // 执行目标方法并返回调用结果
                     Object result = rpcRequestHandler.handle(rpcRequest);
                     log.info(String.format("server get result: %s", result.toString()));
+                    rpcMessage.setMessageType(RpcConstants.RESPONSE_TYPE);
                     if (ctx.channel().isActive() && ctx.channel().isWritable()) {
                         RpcResponse<Object> rpcResponse = RpcResponse.success(result, rpcRequest.getRequestId());
                         rpcMessage.setData(rpcResponse);
-                        rpcMessage.setCodec(SerializationTypeEnum.KRYO.getCode());
-                        rpcMessage.setCompress(CompressTypeEnum.GZIP.getCode());
-                        rpcMessage.setMessageType(RpcConstants.RESPONSE_TYPE);
                     } else {
                         RpcResponse<Object> rpcResponse = RpcResponse.fail(RpcResponseCodeEnum.FAIL);
                         rpcMessage.setData(rpcResponse);

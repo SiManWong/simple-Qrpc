@@ -114,39 +114,42 @@ public class RpcMessageDecoder extends LengthFieldBasedFrameDecoder {
         // 请求id
         int requestId = in.readInt();
         // 构建 RpcMessage
-        RpcMessage rpcMessage = new RpcMessage();
-        rpcMessage.setMessageType(messageType);
-        rpcMessage.setCodec(codecType);
-        rpcMessage.setRequestId(requestId);
+        RpcMessage rpcMessage = RpcMessage.builder()
+                .codec(codecType)
+                .requestId(requestId)
+                .messageType(messageType).build();
 
         // 心跳请求
         if (messageType == RpcConstants.HEARTBEAT_REQUEST_TYPE) {
             rpcMessage.setData(RpcConstants.PING);
-        } else if (messageType == RpcConstants.HEARTBEAT_RESPONSE_TYPE) {
+            return rpcMessage;
+        }
+        if (messageType == RpcConstants.HEARTBEAT_RESPONSE_TYPE) {
             // 心跳响应
             rpcMessage.setData(RpcConstants.PONG);
-        } else {
-            int bodyLength = fullLength - RpcConstants.HEAD_LENGTH;
-            if (bodyLength > 0) {
-                byte[] bs = new byte[bodyLength];
-                in.readBytes(bs);
-                // 获取压缩方式
-                String compressName = CompressTypeEnum.getName(compressType);
-                Compress compress = ExtensionLoader.getExtensionLoader(Compress.class)
-                        .getExtension(compressName);
-                bs = compress.decompress(bs);
-                // 序列化方式
-                String codecName = SerializationTypeEnum.getName(codecType);
-                Serializer serializer = ExtensionLoader.getExtensionLoader(Serializer.class)
-                        .getExtension(codecName);
-                // 反序列化得到 RpcRequest 或 RpcResponse
-                if (messageType == RpcConstants.REQUEST_TYPE) {
-                    RpcRequest rpcRequest = serializer.deserialize(bs, RpcRequest.class);
-                    rpcMessage.setData(rpcRequest);
-                } else {
-                    RpcResponse rpcResponse = serializer.deserialize(bs, RpcResponse.class);
-                    rpcMessage.setData(rpcResponse);
-                }
+            return rpcMessage;
+        }
+        int bodyLength = fullLength - RpcConstants.HEAD_LENGTH;
+        if (bodyLength > 0) {
+            byte[] bs = new byte[bodyLength];
+            in.readBytes(bs);
+            // 获取压缩方式
+            String compressName = CompressTypeEnum.getName(compressType);
+            Compress compress = ExtensionLoader.getExtensionLoader(Compress.class)
+                    .getExtension(compressName);
+            bs = compress.decompress(bs);
+            // 序列化方式
+            String codecName = SerializationTypeEnum.getName(codecType);
+            log.info("codec name: [{}] ", codecName);
+            Serializer serializer = ExtensionLoader.getExtensionLoader(Serializer.class)
+                    .getExtension(codecName);
+            // 反序列化得到 RpcRequest 或 RpcResponse
+            if (messageType == RpcConstants.REQUEST_TYPE) {
+                RpcRequest rpcRequest = serializer.deserialize(bs, RpcRequest.class);
+                rpcMessage.setData(rpcRequest);
+            } else {
+                RpcResponse rpcResponse = serializer.deserialize(bs, RpcResponse.class);
+                rpcMessage.setData(rpcResponse);
             }
         }
         return rpcMessage;
